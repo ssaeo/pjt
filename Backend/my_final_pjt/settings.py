@@ -15,6 +15,16 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import os
+import environ
+
+env = environ.Env(DEBUG=(bool, True))
+environ.Env.read_env(
+    env_file=os.path.join(BASE_DIR, '.env')
+)
+
+# .env -> API_KEY=48ee67b3aa4f0b17695a22a4f91a78fb (추후 삭제)
+API_KEY = env('API_KEY')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -33,6 +43,8 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'accounts',     # accounts 앱
     'articles',     # article 앱
+    'finlife',
+    'bankmap',
     'rest_framework',   # restframework
     'rest_framework.authtoken',
     'dj_rest_auth',
@@ -75,6 +87,13 @@ REST_FRAMEWORK = {
 
 
 ROOT_URLCONF = 'my_final_pjt.urls'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 TEMPLATES = [
     {
