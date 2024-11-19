@@ -1,6 +1,25 @@
-asgiref==3.8.1
-Django==4.2.16
-djangorestframework==3.15.2
-sqlparse==0.5.2
-typing_extensions==4.12.2
-tzdata==2024.2
+asgiref==3.8.1               # Django의 비동기 지원을 위한 ASGI(Asynchronous Server Gateway Interface) 참조 구현
+attrs==24.2.0                # Python 객체 속성 정의 및 검증을 쉽게 해주는 유틸리티 라이브러리
+certifi==2024.8.30           # 신뢰할 수 있는 CA(Certificate Authority) 인증서 제공
+charset-normalizer==3.4.0    # 텍스트 인코딩 감지 및 변환에 사용되는 라이브러리
+dj-rest-auth==7.0.0          # Django REST Framework 기반 인증 및 사용자 관리 라이브러리
+Django==4.2.16               # Python 기반 웹 프레임워크
+django-allauth==65.2.0       # 인증, 회원가입, 소셜 로그인을 쉽게 구현할 수 있는 Django 패키지
+django-cors-headers==4.6.0   # Django와 외부 도메인 간의 CORS(Cross-Origin Resource Sharing) 처리를 위한 라이브러리
+django-environ==0.11.2       # 환경 변수와 설정 관리를 쉽게 해주는 Django용 패키지
+django-extensions==3.2.3     # Django 프로젝트에 유용한 명령 및 확장 기능을 추가
+djangorestframework==3.15.2  # Django를 위한 REST API 프레임워크
+idna==3.10                   # IDNA(Internationalized Domain Names in Applications) 표준 지원
+jsonschema==4.23.0           # JSON 스키마 검증을 위한 라이브러리
+jsonschema-specifications==2024.10.1 # JSON 스키마 사양을 위한 사전 정의된 참조 라이브러리
+oauthlib==3.2.2              # OAuth1, OAuth2 인증을 위한 라이브러리
+pillow==11.0.0               # Python Imaging Library(PIL)의 유지 및 확장 버전으로 이미지 처리 기능 제공
+PyJWT==2.10.0                # JSON Web Token(JWT) 생성 및 디코딩을 위한 라이브러리
+referencing==0.35.1          # JSON 스키마 참조 해결을 위한 라이브러리
+requests==2.32.3             # HTTP 요청을 쉽게 처리할 수 있는 라이브러리
+requests-oauthlib==2.0.0     # OAuth1, OAuth2 인증을 위한 requests 확장
+rpds-py==0.21.0              # JSON 스키마 등의 데이터 구조에 최적화된 Python 라이브러리
+sqlparse==0.5.2              # SQL 구문 분석 및 포맷팅을 위한 라이브러리
+typing_extensions==4.12.2    # 최신 Python 버전의 타입 힌트 기능을 이전 버전에서도 사용할 수 있도록 지원
+tzdata==2024.2               # 최신 타임존 정보를 제공
+urllib3==2.2.3               # HTTP 클라이언트 기능을 제공하는 라이브러리로, requests의 의존성

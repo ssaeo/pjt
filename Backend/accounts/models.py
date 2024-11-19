@@ -2,28 +2,16 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 
-# Create your models here.
 class User(AbstractUser):
-    # name = models.CharField(max_length=30)
-    # password = models.CharField()
-    email = models.EmailField(unique=True)
-    age = models.PositiveIntegerField(validators=[MinValueValidator(1)], blank=True, null=True)     # 양수 + 1이상
-    address = models.CharField(max_length=255, blank=True, null=True)
-    # profile_img = models.ImageField(upload_to='', default='') 폴더 추가예정
-    fin_products = models.TextField(blank=True, null=True)
-    joined_date = models.DateTimeField(auto_now_add=True)
-    # is_active = models.BooleanField(default=True)
-    # is_staff = models.BooleanField(default=False)
+    name = models.CharField(max_length=30, blank=True, null=True)  # 사용자 이름
+    email = models.EmailField(unique=True)  # 이메일
+    age = models.PositiveIntegerField(validators=[MinValueValidator(1)], blank=True, null=True)  # 나이
+    address = models.CharField(max_length=255, blank=True, null=True)  # 주소
+    profile_img = models.ImageField(upload_to='image/', blank=True, null=True)  # 프로필 이미지
+    fin_products = models.TextField(blank=True, null=True)  # 가입한 금융 상품 (쉼표 구분 텍스트)
+    joined_date = models.DateTimeField(auto_now_add=True)  # 가입 날짜
+    wealth = models.IntegerField(blank=True, null=True)  # 재산
+    salary = models.IntegerField(blank=True, null=True)  # 월수입
 
-    # AbstractUser에 이미 포함되어 작성하지 않은 필드
-    '''
-    username
-    password
-    is_active - 정지, 탈퇴 데이터 관리용
-    is_staff - 관리자
-    '''
-    # 커스텀 유저관련, 예적금 추가필요 
-
-    
     def __str__(self):
         return self.username
