@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h1>로그인</h1>
-    <form @submit.prevent="logIn">
+    <h1>회원가입</h1>
+    <form @submit.prevent="signUp">
       <div>
         <label for="username">아이디: </label>
         <input type="text" id="username" v-model.trim="username" required>
@@ -12,7 +12,7 @@
         <input type="password" id="password" v-model.trim="password" required>
       </div>
 
-      <button type="submit">로그인</button>
+      <button type="submit">가입하기</button>
     </form>
   </div>
 </template>
@@ -26,11 +26,11 @@ const password = ref('')
 
 const store = useCounterStore()
 
-const logIn = function () {
+const signUp = function () {
   const payload = {
     username: username.value,
     password: password.value
   }
-  store.logIn(payload)
+  store.signUp(payload)
 }
 </script>

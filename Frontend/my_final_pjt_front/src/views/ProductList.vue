@@ -30,25 +30,19 @@
   </div>
 </template>
 
-<script>
-import axios from "axios";
+<script setup>
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-export default {
-  data() {
-    return {
-      products: [], // 상품 목록 데이터
-    };
-  },
-  mounted() {
-    axios
-      .get("http://localhost:8000/finlife/products/")
-      .then((response) => {
-        const { deposits, savings } = response.data;
-        this.products = [...deposits, ...savings]; // 예금 + 적금 데이터 통합
-      })
-      .catch((error) => {
-        console.error("상품 목록을 불러오는 중 오류:", error);
-      });
-  },
-};
+const products = ref([])
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('http://localhost:8000/finlife/products/')
+    const { deposits, savings } = response.data
+    products.value = [...deposits, ...savings]
+  } catch (error) {
+    console.error('상품 목록을 불러오는 중 오류:', error)
+  }
+})
 </script>
