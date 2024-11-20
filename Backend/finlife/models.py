@@ -23,12 +23,12 @@ class DepositOptions(models.Model): # 예금상품 옵션
 
 class SavingProducts(models.Model): # 적금상품
     fin_prdt_cd = models.TextField(unique=True)         # 금융 상품 코드
-    kor_co_nm = models.TextField()                      # 금융회사명
-    fin_prdt_nm = models.TextField()                    # 금융 상품명
-    etc_note = models.TextField()                       # 금융 상품 설명
+    kor_co_nm = models.TextField()                      # 금융회사명 O
+    fin_prdt_nm = models.TextField()                    # 금융 상품명 O
+    etc_note = models.TextField()                       # 금융 상품 설명 O
     join_deny = models.IntegerField()                   # 가입 제한 (1: 제한없음, 2: 서민전용, 3: 일부제한)
-    join_member = models.TextField()                    # 가입 대상
-    join_way = models.TextField()                       # 가입 방법
+    join_member = models.TextField()                    # 가입 대상 O
+    join_way = models.TextField()                       # 가입 방법 O
     spcl_cnd = models.TextField()                       # 우대조건
 
 class SavingOptions(models.Model): # 적금상품 옵션

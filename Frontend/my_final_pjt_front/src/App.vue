@@ -5,7 +5,7 @@
         <li><RouterLink to="/">Home</RouterLink></li>
         <li><RouterLink to="/calculator">Exchange Calculator</RouterLink></li>
         <li><RouterLink to="/bank-map">Bank Map</RouterLink></li>
-        <li><RouterLink to="/products">Products</RouterLink></li> <!-- Products 링크 추가 -->
+        <li><RouterLink to="/products">Products</RouterLink></li>
       </ul>
     </nav>
     <RouterView />
@@ -13,15 +13,16 @@
 </template>
 
 <script>
-import { RouterView, RouterLink } from 'vue-router';
+import { defineComponent } from 'vue'
+import { RouterView, RouterLink } from 'vue-router'
 
-export default {
+export default defineComponent({
   name: 'App',
   components: {
     RouterView,
     RouterLink,
   },
-};
+})
 </script>
 
 <style>
