@@ -6,13 +6,12 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'HomeView',
-  methods: {
-    navigateToCalculator() {
-      this.$router.push('/calculator');
-    },
-  },
-};
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const navigateToCalculator = () => {
+  router.push('/calculator')
+}
 </script>

@@ -1,50 +1,30 @@
 <template>
-  <div id="app">
+  <header>
     <nav>
-      <ul>
-        <li><RouterLink to="/">Home</RouterLink></li>
-        <li><RouterLink to="/calculator">Exchange Calculator</RouterLink></li>
-        <li><RouterLink to="/bank-map">Bank Map</RouterLink></li>
-        <li><RouterLink to="/products">Products</RouterLink></li> <!-- Products 링크 추가 -->
-      </ul>
+      <RouterLink :to="{ name: 'ArticleList' }">게시판</RouterLink> |
+      <template v-if="!store.isLogin">
+        <RouterLink :to="{ name: 'SignUpView' }">회원가입</RouterLink> |
+        <RouterLink :to="{ name: 'LogInView' }">로그인</RouterLink>
+      </template>
+      <template v-else>
+        <RouterLink 
+          :to="{ name: 'ProfileView', params: { username: store.user?.username }}"
+        >프로필</RouterLink> |
+        <button @click="logOut">로그아웃</button>
+      </template>
     </nav>
-    <RouterView />
-  </div>
+  </header>
+
+  <RouterView />
 </template>
 
-<script>
-import { RouterView, RouterLink } from 'vue-router';
+<script setup>
+import { RouterLink, RouterView } from 'vue-router'
+import { useCounterStore } from '@/stores/counter'
 
-export default {
-  name: 'App',
-  components: {
-    RouterView,
-    RouterLink,
-  },
-};
+const store = useCounterStore()
+
+const logOut = () => {
+  store.logOut()
+}
 </script>
-
-<style>
-nav {
-  background-color: #f8f9fa;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-}
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: 15px; /* 메뉴 간격 */
-}
-li {
-  display: inline;
-}
-a {
-  text-decoration: none;
-  color: #007bff;
-}
-a:hover {
-  text-decoration: underline;
-}
-</style>
