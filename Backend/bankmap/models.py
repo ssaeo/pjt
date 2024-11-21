@@ -1,18 +1,24 @@
 from django.db import models
 
 class BankBranch(models.Model):
-    brch_name = models.CharField(max_length=100)  # 지점명
-    addr = models.CharField(max_length=200)       # 주소
-    latitude = models.DecimalField(max_digits=9, decimal_places=6)  # 위도
-    longitude = models.DecimalField(max_digits=9, decimal_places=6) # 경도
-    brch_telno = models.CharField(max_length=20, null=True, blank=True)  # 전화번호
-    
-    def __str__(self):
-        return self.brch_name
+    BANK_CHOICES = [
+        ('004', '국민은행'),
+        ('011', '농협은행'),
+        ('020', '우리은행'),
+        ('081', '하나은행'),
+    ]
 
-class FinMapToken(models.Model):
-    access_token = models.CharField(max_length=1000)
-    token_type = models.CharField(max_length=50)
-    expires_in = models.IntegerField()
-    scope = models.CharField(max_length=50)
-    created_at = models.DateTimeField(auto_now_add=True)
+    brch_name = models.CharField(max_length=100)
+    addr = models.CharField(max_length=200)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    brch_telno = models.CharField(max_length=20, null=True, blank=True)
+    bank_code = models.CharField(
+        max_length=3, 
+        choices=BANK_CHOICES,
+        null=True,  # null 허용
+        blank=True  # 폼에서 빈 값 허용
+    )
+
+    def __str__(self):
+        return f"[{self.get_bank_code_display()}] {self.brch_name}"

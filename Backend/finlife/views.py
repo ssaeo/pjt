@@ -270,11 +270,15 @@ def join_product(request):
     """
     금융상품 가입
     """
+    print('받은 데이터:', request.data)  # 디버깅용 로그
     product_type = request.data.get('product_type')
     product_id = request.data.get('product_id')
     
     if not product_type or not product_id:
-        return Response({"error": "상품 정보가 필요합니다."}, status=400)
+        return Response(
+            {'message': '상품 타입과 ID가 필요합니다.'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
     user = request.user
     current_products = user.fin_products.split(',') if user.fin_products else []

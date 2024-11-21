@@ -1,17 +1,17 @@
 <template>
-  <div>
-    <h1>환율 계산기 서비스</h1>
-    <p>간단하게 환율을 계산하고 외화를 변환해보세요.</p>
-    <button @click="navigateToCalculator">환율 계산기로 이동</button>
+  <div class="home">
+    <h1>금융 서비스 플랫폼</h1>
+    <p>금융 상품 조회, 환율 계산, 은행 지점 찾기 등 다양한 금융 서비스를 이용해보세요.</p>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-const navigateToCalculator = () => {
-  router.push('/calculator')
-}
+// 필요한 로직이 있다면 여기에 추가
 </script>
+
+<style scoped>
+.home {
+  text-align: center;
+  padding: 2rem;
+}
+</style>

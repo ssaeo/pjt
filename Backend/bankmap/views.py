@@ -1,56 +1,65 @@
-from rest_framework import viewsets
-from .models import BankBranch
-from .serializers import BankBranchSerializer
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+from .models import BankBranch
+from .serializers import BankBranchSerializer
 import logging
-import math  # math 모듈 가져오기
-from .utils import FinMapAPI  # FinMapAPI 가져오기
+import math
 
 logger = logging.getLogger(__name__)
 
 class BankBranchViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = BankBranch.objects.all()
     serializer_class = BankBranchSerializer
 
     @action(detail=False, methods=['get'])
     def nearby(self, request):
-        try:
-            lat = float(request.query_params.get('lat'))
-            lng = float(request.query_params.get('lng'))
-            radius = float(request.query_params.get('radius', 1000))
+        # 1. 파라미터 검증
+        lat = request.query_params.get('lat')
+        lng = request.query_params.get('lng')
+        radius = request.query_params.get('radius', '1000')
+        bank_code = request.query_params.get('bank_code')
 
-            # 요청 데이터 로깅
-            logger.info(f"Nearby search request: lat={lat}, lng={lng}, radius={radius}")
+        logger.debug(f"Received params: lat={lat}, lng={lng}, radius={radius}, bank_code={bank_code}")
 
-            # FinMapAPI를 통해 실제 은행 지점 데이터 조회
-            branches = FinMapAPI.search_branches(
-                lat - radius / 111000,
-                lng - radius / (111000 * math.cos(math.radians(lat))),
-                lat + radius / 111000,
-                lng + radius / (111000 * math.cos(math.radians(lat)))
-            )
-
-            # 검색 결과가 없을 경우
-            if not branches:
-                return Response({"error": "검색 결과가 없습니다."}, status=404)
-
-            # 응답 데이터 가공
-            formatted_branches = [
-                {
-                    "name": branch.get("brch_name"),
-                    "address": branch.get("addr"),
-                    "latitude": branch.get("latitude"),
-                    "longitude": branch.get("longitude"),
-                    "phone": branch.get("brch_telno", "정보 없음"),
-                }
-                for branch in branches
-            ]
-            return Response(formatted_branches)
-
-        except Exception as e:
-            logger.error(f"Error in nearby branches search: {str(e)}")
+        if not all([lat, lng]):
             return Response(
-                {"error": "서버 오류가 발생했습니다."}, 
-                status=500
+                {"error": "위도와 경도는 필수 파라미터입니다."}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
+
+        # 2. 데이터 타입 변환
+        lat = float(lat)
+        lng = float(lng)
+        radius = float(radius)
+
+        # 3. 간단한 범위 검색
+        lat_range = radius / 111000  # 약 111km = 1도
+        lng_range = radius / (111000 * abs(math.cos(math.radians(lat))))
+
+        query = Q(
+            latitude__gte=lat - lat_range,
+            latitude__lte=lat + lat_range,
+            longitude__gte=lng - lng_range,
+            longitude__lte=lng + lng_range
+        )
+
+        if bank_code:
+            query &= Q(bank_code=bank_code)
+
+        # 4. 쿼리 실행
+        branches = BankBranch.objects.filter(query)[:50]  # 최대 50개로 제한
+        
+        logger.debug(f"Query: {query}")
+        logger.debug(f"Found {branches.count()} branches")
+
+        # 5. 시리얼라이즈 및 응답
+        serializer = self.serializer_class(branches, many=True)
+        
+        return Response({
+            "count": len(serializer.data),
+            "results": serializer.data
+        })

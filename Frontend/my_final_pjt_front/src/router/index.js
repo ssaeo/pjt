@@ -10,6 +10,7 @@ import ProductDetailView from '@/views/ProductDetailView.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import LogInView from '@/views/LoginView.vue'
 import ProfileView from '@/views/ProfileView.vue'
+import ExchangeCalculatorView from '@/views/ExchangeCalculatorView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,6 +66,11 @@ const router = createRouter({
       name: 'ProductDetail',
       component: ProductDetailView,
       props: true
+    },
+    {
+      path: '/exchange-calculator',
+      name: 'ExchangeCalculator',
+      component: ExchangeCalculatorView
     }
   ]
 })

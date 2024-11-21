@@ -6,6 +6,7 @@
         <RouterLink :to="{ name: 'ArticleList' }">게시판</RouterLink> |
         <RouterLink :to="{ name: 'BankMap' }">은행찾기</RouterLink> |
         <RouterLink :to="{ name: 'FinancialProducts' }">금융상품</RouterLink> |
+        <RouterLink to="/exchange-calculator">환율계산기</RouterLink>
         <template v-if="!store.isLogin">
           <RouterLink :to="{ name: 'SignUpView' }">회원가입</RouterLink> |
           <RouterLink :to="{ name: 'LogInView' }">로그인</RouterLink>

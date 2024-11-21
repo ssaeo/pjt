@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator
 
 class User(AbstractUser):
     name = models.CharField(max_length=30, blank=True, null=True)  # 사용자 이름
-    email = models.EmailField()  # 이메일
+    email = models.EmailField(blank=True, null=True)  # 이메일
     age = models.PositiveIntegerField(validators=[MinValueValidator(1)], blank=True, null=True)  # 나이
     address = models.CharField(max_length=255, blank=True, null=True)  # 주소
     profile_img = models.ImageField(upload_to='image/', default='image/profile.png')  # 프로필 이미지

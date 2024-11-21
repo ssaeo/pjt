@@ -229,12 +229,18 @@ const filteredProducts = computed(() => {
 
 // 상품 선택 및 상세 정보 조회
 const selectProduct = (product) => {
+  console.log('선택된 상품 원본:', product)  // 디버깅용 로그
+  
   store.fetchProductDetail(product.type, product.id)
     .then((detail) => {
+      // 상품 타입 정보 추가
+      detail.product.type = product.type  // 이 부분이 중요
+      console.log('가공된 상세 정보:', detail)
       selectedProduct.value = detail
     })
     .catch((err) => {
       console.error('상품 상세 정보 조회 실패:', err)
+      alert('상품 정보를 불러오는데 실패했습니다.')
     })
 }
 
@@ -259,16 +265,28 @@ const joinProduct = () => {
     return
   }
 
-  store.joinFinancialProduct(
-    selectedProduct.value.product.type,
-    selectedProduct.value.product.id
-  )
+  console.log('selectedProduct:', selectedProduct.value)
+
+  // product 객체에서 직접 type과 id를 가져옴
+  const productType = selectedProduct.value.product.type  // type 필드가 있는지 확인 필요
+  const productId = selectedProduct.value.product.id
+
+  console.log('전송할 데이터:', { productType, productId })
+
+  // 값이 없는 경우 처리
+  if (!productType || !productId) {
+    alert('상품 정보가 올바르지 않습니다.')
+    return
+  }
+
+  store.joinFinancialProduct(productType, productId)
     .then(() => {
       alert('상품 가입이 완료되었습니다.')
       selectedProduct.value = null
     })
-    .catch(() => {
-      alert('상품 가입에 실패했습니다.')
+    .catch((err) => {
+      const errorMessage = err.response?.data?.message || '상품 가입에 실패했습니다.'
+      alert(errorMessage)
     })
 }
 </script>

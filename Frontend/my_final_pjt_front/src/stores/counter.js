@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import router from '@/router'
+import exchangeData from '@/assets/exchangeJSON.json'
 
 export const useCounterStore = defineStore('counter', () => {
   // state
@@ -11,7 +12,7 @@ export const useCounterStore = defineStore('counter', () => {
   const API_URL = 'http://127.0.0.1:8000'
   // bank
   const bankBranches = ref([])
-  const selectedBranch = ref(null)
+  // const selectedBranch = ref(null)
   // products
   const products = ref({
     deposits: [],
@@ -19,6 +20,8 @@ export const useCounterStore = defineStore('counter', () => {
   })
   const selectedProduct = ref(null)
   const selectedBank = ref(null)
+  // 환율계산기
+  const exchangeRates = ref([])  
 
   // getters
   const isLogin = computed(() => {
@@ -277,28 +280,29 @@ const logOut = function () {
   }
 
   // 은행(BankMap)
-  const searchNearbyBranches = function (lat, lng, radius = 1000) {
-    return axios({
-      method: 'get',
-      url: `${API_URL}/bank-branches/nearby/`,
-      params: {
-        lat,
-        lng,
-        radius
+  // 은행 검색 관련 actions
+  const searchNearbyBranches = (params) => {
+    if (!token.value) {
+      return Promise.reject('로그인이 필요합니다.')
+    }
+  
+    console.log('검색 파라미터:', params)
+  
+    return axios.get(`${API_URL}/bank-branches/nearby/`, { 
+      params,
+      headers: {
+        'Authorization': `Token ${token.value}`
       }
     })
       .then((res) => {
-        bankBranches.value = res.data
-        return res.data
+        console.log('서버 응답:', res.data)
+        bankBranches.value = res.data.results
+        return res.data.results
       })
       .catch((err) => {
-        console.error('은행 지점 검색 실패:', err)
-        return []
+        console.error('주변 은행 검색 실패:', err.response?.data || err)
+        throw err
       })
-  }
-
-  const setSelectedBranch = function (branch) {
-    selectedBranch.value = branch
   }
 
   // 금융상품 관련 actions
@@ -330,9 +334,17 @@ const fetchProductDetail = function (type, id) {
 }
 
 const joinFinancialProduct = function (productType, productId) {
+  // 디버깅을 위한 로그 추가
+  console.log('joinFinancialProduct 호출됨:', { productType, productId })
+
+  if (!productType || !productId) {
+    console.error('상품 타입 또는 ID가 없습니다')
+    return Promise.reject(new Error('상품 정보가 올바르지 않습니다.'))
+  }
+
   return axios({
     method: 'post',
-    url: `${API_URL}/finlife/products/join/`,  // URL 수정
+    url: `${API_URL}/finlife/products/join/`,
     data: {
       product_type: productType,
       product_id: productId
@@ -342,10 +354,11 @@ const joinFinancialProduct = function (productType, productId) {
     }
   })
     .then((res) => {
+      console.log('가입 성공 응답:', res.data)
       return res.data
     })
     .catch((err) => {
-      console.error('상품 가입 실패:', err)
+      console.error('가입 실패 응답:', err.response?.data)
       throw err
     })
 }
@@ -365,6 +378,10 @@ const getMyFinancialProducts = function () {
       console.error('가입 상품 조회 실패:', err)
       return []
     })
+}
+// 환율계산기
+const loadExchangeRates = () => {
+  exchangeRates.value = exchangeData
 }
 
 
@@ -394,9 +411,11 @@ const getMyFinancialProducts = function () {
     deleteComment,
     // BankMap
     bankBranches,
-    selectedBranch,
     searchNearbyBranches,
-    setSelectedBranch,
+    // searchBranches,
+    // selectedBranch,
+    // searchNearbyBranches,
+    // setSelectedBranch,
     // Products
     products,
     selectedBank,
@@ -405,6 +424,8 @@ const getMyFinancialProducts = function () {
     fetchProductDetail,
     joinFinancialProduct,
     getMyFinancialProducts,
-
+    // 환율계산기
+    exchangeRates,
+    loadExchangeRates,
   }
 }, { persist: true })
