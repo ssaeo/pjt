@@ -22,4 +22,5 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('articles/', include('articles.urls')),
     path('finlife/', include('finlife.urls')),
+    path('', include('bankmap.urls')),
 ]

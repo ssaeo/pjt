@@ -41,40 +41,50 @@
 </template>
 
 <script>
-import exchangeData from '@/assets/exchangeJSON.json';
+import { ref, computed, onMounted } from 'vue'
+import exchangeData from '@/assets/exchangeJSON.json'
 
 export default {
-  name: 'ExchangeCalculator',
-  data() {
+  setup() {
+    const rates = ref([]) // 환율 데이터
+    const selectedCountry = ref('') // 선택된 국가
+    const krwAmount = ref(0) // 입력한 원화 금액
+    const foreignAmount = ref(0) // 입력한 외국 통화 금액
+    const convertedForeignAmount = ref(0) // 변환된 외국 통화 금액
+    const convertedKRWAmount = ref(0) // 변환된 원화 금액
+
+    const convertToForeign = () => {
+      const selectedRate = rates.value.find(rate => rate.cur_unit === selectedCountry.value)
+      if (selectedRate) {
+        convertedForeignAmount.value = (krwAmount.value / parseFloat(selectedRate.deal_bas_r)).toFixed(2)
+      }
+    }
+
+    const convertToKRW = () => {
+      const selectedRate = rates.value.find(rate => rate.cur_unit === selectedCountry.value)
+      if (selectedRate) {
+        convertedKRWAmount.value = (foreignAmount.value * parseFloat(selectedRate.deal_bas_r)).toFixed(2)
+      }
+    }
+
+    onMounted(() => {
+      // 환율 데이터 로드
+      rates.value = exchangeData
+      if (rates.value.length > 0) {
+        selectedCountry.value = rates.value[0].cur_unit // 기본값 설정
+      }
+    })
+
     return {
-      rates: [], // 환율 데이터
-      selectedCountry: '', // 선택된 국가
-      krwAmount: 0, // 입력한 원화 금액
-      foreignAmount: 0, // 입력한 외국 통화 금액
-      convertedForeignAmount: 0, // 변환된 외국 통화 금액
-      convertedKRWAmount: 0, // 변환된 원화 금액
-    };
-  },
-  methods: {
-    convertToForeign() {
-      const selectedRate = this.rates.find(rate => rate.cur_unit === this.selectedCountry);
-      if (selectedRate) {
-        this.convertedForeignAmount = (this.krwAmount / parseFloat(selectedRate.deal_bas_r)).toFixed(2);
-      }
-    },
-    convertToKRW() {
-      const selectedRate = this.rates.find(rate => rate.cur_unit === this.selectedCountry);
-      if (selectedRate) {
-        this.convertedKRWAmount = (this.foreignAmount * parseFloat(selectedRate.deal_bas_r)).toFixed(2);
-      }
-    },
-  },
-  mounted() {
-    // 환율 데이터 로드
-    this.rates = exchangeData;
-    if (this.rates.length > 0) {
-      this.selectedCountry = this.rates[0].cur_unit; // 기본값 설정
+      rates,
+      selectedCountry,
+      krwAmount,
+      foreignAmount,
+      convertedForeignAmount,
+      convertedKRWAmount,
+      convertToForeign,
+      convertToKRW,
     }
   },
-};
+}
 </script>
