@@ -1,38 +1,70 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useCounterStore } from '@/stores/counter'
+import HomeView from '@/views/HomeView.vue'
+import ArticleList from '@/views/ArticleListView.vue'
+import ArticleDetail from '@/views/ArticleDetailView.vue'
+import ArticleCreate from '@/views/ArticleCreateView.vue'
+import BankMapView from '@/views/BankMapView.vue'
+import FinancialProductsView from '@/views/FinancialProductsView.vue'
+import ProductDetailView from '@/views/ProductDetailView.vue'
+import SignUpView from '@/views/SignUpView.vue'
+import LogInView from '@/views/LoginView.vue'
+import ProfileView from '@/views/ProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      name: 'home',
+      component: HomeView
+    },
+    {
       path: '/signup',
       name: 'SignUpView',
-      component: () => import('@/views/SignUpView.vue')
+      component: SignUpView
     },
     {
       path: '/login',
       name: 'LogInView',
-      component: () => import('@/views/LoginView.vue')
+      component: LogInView
     },
     {
       path: '/profile/:username',
       name: 'ProfileView',
-      component: () => import('@/views/ProfileView.vue')
+      component: ProfileView,
+      props: true
     },
     {
       path: '/articles',
       name: 'ArticleList',
-      component: () => import('@/views/ArticleListView.vue')
+      component: ArticleList
     },
     {
       path: '/articles/:id',
       name: 'ArticleDetail',
-      component: () => import('@/views/ArticleDetailView.vue')
+      component: ArticleDetail
     },
     {
       path: '/articles/create',
       name: 'ArticleCreate',
-      component: () => import('@/views/ArticleCreateView.vue')
+      component: ArticleCreate
+    },
+    {
+      path: '/bankmap',
+      name: 'BankMap',
+      component: BankMapView
+    },
+    {
+      path: '/financial-products',
+      name: 'FinancialProducts',
+      component: FinancialProductsView
+    },
+    {
+      path: '/product/:type/:id',
+      name: 'ProductDetail',
+      component: ProductDetailView,
+      props: true
     }
   ]
 })
@@ -52,6 +84,3 @@ router.beforeEach((to, from) => {
 })
 
 export default router
-
-
-

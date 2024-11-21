@@ -1,14 +1,10 @@
-# finlife/serializers.py
-
 from rest_framework import serializers
 from .models import DepositProducts, DepositOptions, SavingProducts, SavingOptions
-
 
 class DepositProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DepositProducts
         fields = '__all__'
-
 
 class DepositOptionsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,4 +21,4 @@ class SavingOptionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SavingOptions
         fields = '__all__'
-        read_only_fields = ('product', ) 
+        read_only_fields = ('product', )

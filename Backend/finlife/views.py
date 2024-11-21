@@ -2,8 +2,10 @@ import requests
 from django.conf import settings
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from .models import DepositProducts, DepositOptions, SavingProducts, SavingOptions
 from .serializers import DepositProductsSerializer, DepositOptionsSerializer, SavingProductsSerializer, SavingOptionsSerializer
 
@@ -260,3 +262,88 @@ def product_detail(request, product_type, product_id):
         })
 
     return Response({"error": "Invalid product type"}, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def join_product(request):
+    """
+    금융상품 가입
+    """
+    product_type = request.data.get('product_type')
+    product_id = request.data.get('product_id')
+    
+    if not product_type or not product_id:
+        return Response({"error": "상품 정보가 필요합니다."}, status=400)
+    
+    user = request.user
+    current_products = user.fin_products.split(',') if user.fin_products else []
+    new_product = f"{product_type}:{product_id}"
+    
+    if new_product not in current_products:
+        current_products.append(new_product)
+        user.fin_products = ','.join(filter(None, current_products))
+        user.save()
+        
+    return Response({
+        "message": "상품 가입이 완료되었습니다.",
+        "fin_products": user.fin_products
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_product(request):
+    """
+    금융상품 해지
+    """
+    product_type = request.data.get('product_type')
+    product_id = request.data.get('product_id')
+    
+    if not product_type or not product_id:
+        return Response({"error": "상품 정보가 필요합니다."}, status=400)
+    
+    user = request.user
+    current_products = user.fin_products.split(',') if user.fin_products else []
+    product_to_remove = f"{product_type}:{product_id}"
+    
+    if product_to_remove in current_products:
+        current_products.remove(product_to_remove)
+        user.fin_products = ','.join(filter(None, current_products))
+        user.save()
+        
+    return Response({
+        "message": "상품이 해지되었습니다.",
+        "fin_products": user.fin_products
+    })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_products(request):
+    """
+    사용자의 가입 상품 목록 조회
+    """
+    user = request.user
+    if not user.fin_products:
+        return Response({"products": []})
+    
+    product_list = [p for p in user.fin_products.split(',') if p]
+    products = []
+    
+    for product_info in product_list:
+        try:
+            product_type, product_id = product_info.split(':')
+            if product_type == 'deposit':
+                product = get_object_or_404(DepositProducts, id=product_id)
+                serializer = DepositProductsSerializer(product)
+            else:
+                product = get_object_or_404(SavingProducts, id=product_id)
+                serializer = SavingProductsSerializer(product)
+            products.append({
+                'type': product_type,
+                'product': serializer.data
+            })
+        except Exception as e:
+            print(f"Error processing product {product_info}: {str(e)}")
+            continue
+            
+    return Response({"products": products})

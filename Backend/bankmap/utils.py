@@ -61,4 +61,4 @@ class FinMapAPI:
             return response.json().get('data', [])
         except Exception as e:
             logger.error(f"Error in FinMapAPI search_branches: {str(e)}")
-            return [] 
+            return []

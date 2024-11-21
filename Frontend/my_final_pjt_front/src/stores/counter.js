@@ -9,6 +9,16 @@ export const useCounterStore = defineStore('counter', () => {
   const user = ref(null)
   const articles = ref([])
   const API_URL = 'http://127.0.0.1:8000'
+  // bank
+  const bankBranches = ref([])
+  const selectedBranch = ref(null)
+  // products
+  const products = ref({
+    deposits: [],
+    savings: []
+  })
+  const selectedProduct = ref(null)
+  const selectedBank = ref(null)
 
   // getters
   const isLogin = computed(() => {
@@ -266,6 +276,100 @@ const logOut = function () {
       })
   }
 
+  // 은행(BankMap)
+  const searchNearbyBranches = function (lat, lng, radius = 1000) {
+    return axios({
+      method: 'get',
+      url: `${API_URL}/bank-branches/nearby/`,
+      params: {
+        lat,
+        lng,
+        radius
+      }
+    })
+      .then((res) => {
+        bankBranches.value = res.data
+        return res.data
+      })
+      .catch((err) => {
+        console.error('은행 지점 검색 실패:', err)
+        return []
+      })
+  }
+
+  const setSelectedBranch = function (branch) {
+    selectedBranch.value = branch
+  }
+
+  // 금융상품 관련 actions
+const fetchProducts = function () {
+  return axios({
+    method: 'get',
+    url: `${API_URL}/finlife/products/`  // URL 수정
+  })
+    .then((res) => {
+      products.value = res.data
+    })
+    .catch((err) => {
+      console.error('상품 목록 조회 실패:', err)
+    })
+}
+
+const fetchProductDetail = function (type, id) {
+  return axios({
+    method: 'get',
+    url: `${API_URL}/finlife/products/${type}/${id}/`  // URL 수정
+  })
+    .then((res) => {
+      selectedProduct.value = res.data
+      return res.data
+    })
+    .catch((err) => {
+      console.error('상품 상세 조회 실패:', err)
+    })
+}
+
+const joinFinancialProduct = function (productType, productId) {
+  return axios({
+    method: 'post',
+    url: `${API_URL}/finlife/products/join/`,  // URL 수정
+    data: {
+      product_type: productType,
+      product_id: productId
+    },
+    headers: {
+      Authorization: `Token ${token.value}`
+    }
+  })
+    .then((res) => {
+      return res.data
+    })
+    .catch((err) => {
+      console.error('상품 가입 실패:', err)
+      throw err
+    })
+}
+
+const getMyFinancialProducts = function () {
+  return axios({
+    method: 'get',
+    url: `${API_URL}/finlife/products/user/`,  // URL 수정
+    headers: {
+      Authorization: `Token ${token.value}`
+    }
+  })
+    .then((res) => {
+      return res.data.products
+    })
+    .catch((err) => {
+      console.error('가입 상품 조회 실패:', err)
+      return []
+    })
+}
+
+
+
+
 
   return { 
     token,
@@ -288,5 +392,19 @@ const logOut = function () {
     getComments,
     createComment,
     deleteComment,
+    // BankMap
+    bankBranches,
+    selectedBranch,
+    searchNearbyBranches,
+    setSelectedBranch,
+    // Products
+    products,
+    selectedBank,
+    selectedProduct,
+    fetchProducts,
+    fetchProductDetail,
+    joinFinancialProduct,
+    getMyFinancialProducts,
+
   }
 }, { persist: true })
