@@ -20,22 +20,45 @@ const router = createRouter({
       name: 'home',
       component: HomeView
     },
+    // accounts
     {
       path: '/signup',
       name: 'SignUpView',
-      component: SignUpView
+      component: SignUpView,
+      beforeEnter: (to, from) => {
+        const store = useCounterStore()
+        if (store.isLogin) {
+          alert('이미 로그인 되어 있습니다.')
+          return false
+        }
+      }
     },
     {
       path: '/login',
       name: 'LogInView',
-      component: LogInView
+      component: LogInView,
+      beforeEnter: (to, from) => {
+        const store = useCounterStore()
+        if (store.isLogin) {
+          alert('이미 로그인 되어 있습니다.')
+          return false
+        }
+      }
     },
     {
       path: '/profile/:username',
       name: 'ProfileView',
       component: ProfileView,
-      props: true
+      props: true,
+      beforeEnter: (to, from) => {
+        const store = useCounterStore()
+        if (!store.isLogin) {
+          alert('로그인 후 이용 가능합니다.')
+          return { name: 'LogInView'}
+        }
+      }
     },
+    // articles
     {
       path: '/articles',
       name: 'ArticleList',
@@ -49,7 +72,14 @@ const router = createRouter({
     {
       path: '/articles/create',
       name: 'ArticleCreate',
-      component: ArticleCreate
+      component: ArticleCreate,
+      beforeEnter: (to, from) => {
+        const store = useCounterStore()
+        if (!store.isLogin) {
+          alert('로그인 후 이용 가능합니다.')
+          return { name: 'LogInView'}
+        }
+      }
     },
     {
       path: '/bankmap',
@@ -75,18 +105,5 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from) => {
-  const store = useCounterStore()
-  
-  if (to.name === 'ProfileView' && !store.isLogin) {
-    window.alert('로그인이 필요합니다.')
-    return { name: 'LogInView' }
-  }
-
-  if ((to.name === 'SignUpView' || to.name === 'LogInView') && store.isLogin) {
-    window.alert('이미 로그인 되어있습니다.')
-    return { name: 'ProfileView' }
-  }
-})
 
 export default router
