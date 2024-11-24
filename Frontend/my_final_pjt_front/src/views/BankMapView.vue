@@ -1,3 +1,66 @@
+<template>
+  <v-container>
+    <v-row justify="center">
+      <v-col cols="12" md="8">
+        <v-card class="pa-5">
+          <v-card-title>
+            <h1>주변 은행 검색</h1>
+          </v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-row class="d-flex align-center my-5">
+              <v-col cols="12" md="3">
+                <v-select
+                  v-model="selectedCity"
+                  :items="cities"
+                  label="광역시 / 도"
+                  dense
+                  outlined
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-select
+                  v-model="selectedCityDetail"
+                  :items="citiesDetail"
+                  label="시/군/구"
+                  dense
+                  outlined
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-select
+                  v-model="selectedBank"
+                  :items="banks"
+                  label="은행"
+                  dense
+                  outlined
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="3" class="d-flex align-center">
+                <v-btn @click="clickSearch" color="primary" class="search-btn" block>
+                  찾기
+                </v-btn>
+              </v-col>
+            </v-row>
+            <v-card class="map-container elevation-7 mb-15">
+              <v-btn
+                @click="clickCurrentSearch"
+                class="current-search-btn"
+                color="primary"
+                elevation="8"
+                large
+              >
+                현 지도에서 해당 은행 검색
+              </v-btn>
+              <div id="map" :style="`width: 100%; height: 600px;`"></div>
+            </v-card>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 
@@ -154,46 +217,7 @@ const clickCurrentSearch = function () {
 }
 </script>
 
-<template>
-  <div class="container">
-    <h1>주변 은행 검색</h1>
-
-    <div class="d-flex align-center my-5">
-      <select v-model="selectedCity" class="mr-2">
-        <option disabled value="">광역시 / 도</option>
-        <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
-      </select>
-
-      <select v-model="selectedCityDetail" class="mx-2">
-        <option disabled value="">시/군/구</option>
-        <option v-for="detail in citiesDetail" :key="detail" :value="detail">{{ detail }}</option>
-      </select>
-
-      <select v-model="selectedBank" class="mx-2">
-        <option disabled value="">은행</option>
-        <option v-for="bank in banks" :key="bank" :value="bank">{{ bank }}</option>
-      </select>
-
-      <button @click="clickSearch" class="pr-7 ml-2 mb-6">
-        찾기
-      </button>
-    </div>
-
-    <div class="map-container elevation-7 mb-15">
-      <button @click="clickCurrentSearch" class="current-search-btn" rounded="xl" elevation="8" size="large">
-        현 지도에서 해당 은행 검색
-      </button>
-      <div id="map" :style="`width: 1200px; height: 600px;`"></div>
-    </div>
-  </div>
-</template>
-
 <style scoped>
-.container {
-  width: 1200px;
-  margin: 2rem auto;
-}
-
 .map-container {
   position: relative;
   border-radius: 10px;
@@ -205,10 +229,23 @@ const clickCurrentSearch = function () {
   left: 50%;
   z-index: 100;
   transform: translateX(-50%);
-  background-color: white;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 #map {
   border-radius: 10px;
+}
+
+.search-btn {
+  height: 40px; /* 드롭다운과 동일한 높이로 설정 */
+  min-width: 100px;
+}
+
+.v-select {
+  margin-bottom: 20px;
 }
 </style>

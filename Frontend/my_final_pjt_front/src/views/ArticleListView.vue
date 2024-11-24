@@ -1,14 +1,14 @@
 <template>
   <div class="container">
-    <div class="d-flex justify-space-between align-end">
+    <div class="header d-flex justify-space-between align-end mb-4">
       <h1>게시글 목록</h1>
       <v-btn
         variant="flat"
         color="#1089FF"
         :to="{ name: 'ArticleCreate' }"
-      >글 쓰기</v-btn>
+      >작성하기</v-btn>
     </div>
-    <table class="elevation-6">
+    <table class="elevation-6 mb-4">
       <thead>
         <tr>
           <th class="left-align">번호</th>
@@ -93,10 +93,15 @@ onMounted(() => {
   margin: 2rem auto;
 }
 
+.header {
+  margin-bottom: 2rem; /* 글쓰기 버튼과 게시글 목록 사이의 간격 */
+}
+
 .elevation-6 {
   border-radius: 5px;
   width: 100%;
   border-collapse: collapse;
+  margin-bottom: 2rem; /* 게시글 목록과 페이지네이션 사이의 간격 */
 }
 
 th, td {

@@ -342,9 +342,11 @@ def user_products(request):
             if product_type == 'deposit':
                 product = get_object_or_404(DepositProducts, id=product_id)
                 serializer = DepositProductsSerializer(product)
-            else:
+            elif product_type == 'saving':
                 product = get_object_or_404(SavingProducts, id=product_id)
                 serializer = SavingProductsSerializer(product)
+            else:
+                continue
             products.append({
                 'type': product_type,
                 'product': serializer.data

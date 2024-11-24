@@ -395,6 +395,34 @@ const joinFinancialProduct = function (productType, productId) {
     })
 }
 
+// 금융상품 해지
+const terminateProduct = function (productType, productId) {
+  if (!productType || !productId) {
+    console.error('상품 타입 또는 ID가 없습니다');
+    return Promise.reject(new Error('상품 정보가 올바르지 않습니다.'))
+  }
+
+  return axios({
+    method: 'post',
+    url: `${API_URL}/finlife/products/cancel/`,
+    data: {
+      product_type: productType,
+      product_id: productId
+    },
+    headers: {
+      Authorization: `Token ${token.value}`
+    }
+  })
+    .then((res) => {
+      console.log('해지 성공 응답:', res.data)
+      return res.data;
+    })
+    .catch((err) => {
+      console.error('해지 실패 응답:', err.response?.data)
+      throw err;
+    })
+}
+
 const getMyFinancialProducts = function () {
   return axios({
     method: 'get',
@@ -457,6 +485,7 @@ const loadExchangeRates = () => {
     fetchProductDetail,
     joinFinancialProduct,
     getMyFinancialProducts,
+    terminateProduct,
     // 환율계산기
     exchangeRates,
     loadExchangeRates,

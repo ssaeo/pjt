@@ -20,7 +20,10 @@
       <div class="d-flex justify-space-between">
         <div class="left">
           <span class="text-caption">작성일 : {{ formatDate(article.created_at) }}</span>
-          <span class="text-caption">수정일 : {{ formatDate(article.updated_at) }}</span>
+          <span class="text-caption ml-3">수정일 : {{ formatDate(article.updated_at) }}</span> <!-- 간격 추가 -->
+        </div>
+        <div class="right">
+          <span class="text-caption">조회수: {{ article.views }}</span>
         </div>
         <div v-if="isPostedUser" class="right">
           <v-btn
@@ -122,8 +125,15 @@ const isPostedUser = ref(false)
 const pageNum = route.query.page
 
 const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' }
-  return new Date(dateString).toLocaleDateString(undefined, options)
+  const options = { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit' 
+  }
+  return new Date(dateString).toLocaleString(undefined, options)
 }
 
 onMounted(() => {
@@ -209,5 +219,12 @@ const editComment = (commentId, currentContent) => {
 
 .right {
   width: 120px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.ml-3 {
+  margin-left: 1rem; /* 간격 추가 */
 }
 </style>
