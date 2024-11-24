@@ -35,14 +35,20 @@ export const useCounterStore = defineStore('counter', () => {
   // actions
   // 회원가입
   const signUp = function (payload) {
-    const { username, password } = payload
-  
+    const { username, password, email, name, age, address, wealth, salary } = payload
+    
     axios({
       method: 'post',
       url: `${API_URL}/accounts/signup/`,
       data: {
         username: username,
-        password: password
+        password: password,
+        email: email,
+        name: name,
+        age: age,
+        address: address,
+        wealth: wealth,
+        salary: salary
       }
     })
       .then((res) => {
@@ -55,30 +61,31 @@ export const useCounterStore = defineStore('counter', () => {
   }
 
   // 로그인
-const logIn = function (payload) {
-  const { username, password } = payload
-
-  axios({
-    method: 'post',
-    url: `${API_URL}/accounts/login/`,
-    data: {
-      username: username,
-      password: password
-    }
-  })
-    .then((res) => {
-      console.log('로그인 성공:', res.data)
-      token.value = res.data.token
-      user.value = { username: res.data.username }  // user 정보 저장
-      router.push({ 
-        name: 'ProfileView', 
-        params: { username: res.data.username } 
+  const logIn = function (payload) {
+    const { username, password } = payload
+  
+    axios({
+      method: 'post',
+      url: `${API_URL}/accounts/login/`,
+      data: {
+        username: username,
+        password: password
+      }
+    })
+      .then((res) => {
+        console.log('로그인 성공:', res.data)
+        token.value = res.data.token
+        user.value = res.data.user  // 서버에서 받은 사용자 정보 저장
+        router.push({ 
+          name: 'ProfileView', 
+          params: { username: res.data.user.username }  // username 파라미터 추가
+        })
       })
-    })
-    .catch((err) => {
-      console.log('로그인 실패:', err.response?.data)
-    })
-}
+      .catch((err) => {
+        console.error('로그인 실패:', err.response?.data)
+        alert(err.response?.data?.error || '로그인에 실패했습니다.')
+      })
+  }
 
 // 로그아웃
 const logOut = function () {
@@ -118,19 +125,24 @@ const logOut = function () {
 
   // 프로필 수정
   const updateProfile = function (username, userData) {
-    axios({
+    const config = {
       method: 'put',
       url: `${API_URL}/accounts/profile/${username}/`,
       headers: {
-        Authorization: `Token ${token.value}`
+        Authorization: `Token ${token.value}`,
+        // FormData를 사용할 경우 자동으로 multipart/form-data로 설정됨
       },
       data: userData
-    })
+    }
+  
+    return axios(config)
       .then((res) => {
         user.value = res.data
+        return res.data
       })
       .catch((err) => {
-        console.log(err)
+        console.error('프로필 업데이트 실패:', err)
+        throw err
       })
   }
 
@@ -155,10 +167,11 @@ const logOut = function () {
 
 
   // 게시글 관련 actions
-  const getArticles = function () {
+  const getArticles = function (page = 1) {
     return axios({
       method: 'get',
-      url: `${API_URL}/articles/`
+      url: `${API_URL}/articles/`,
+      params: { page }
     })
       .then((res) => {
         articles.value = res.data.results
@@ -260,6 +273,25 @@ const logOut = function () {
       })
       .catch((err) => {
         console.log(err)
+      })
+  }
+
+  // 댓글 수정 함수 추가
+  const updateComment = (articleId, commentId, newContent) => {
+    return axios({
+      method: 'put',
+      url: `${API_URL}/articles/${articleId}/comments/${commentId}/`,
+      data: { content: newContent },
+      headers: {
+        Authorization: `Token ${token.value}`
+      }
+    })
+      .then((res) => {
+        return res.data
+      })
+      .catch((err) => {
+        console.error('댓글 수정 실패:', err)
+        throw err
       })
   }
 
@@ -408,6 +440,7 @@ const loadExchangeRates = () => {
     // 댓글 관련 actions
     getComments,
     createComment,
+    updateComment,
     deleteComment,
     // BankMap
     // bankBranches,

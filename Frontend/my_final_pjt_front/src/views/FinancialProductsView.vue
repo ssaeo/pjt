@@ -57,7 +57,7 @@
         </thead>
         <tbody>
           <tr 
-            v-for="product in filteredProducts" 
+            v-for="product in paginatedProducts"
             :key="`${product.type}-${product.id}`"
             @click="selectProduct(product)"
             class="product-row"
@@ -74,6 +74,27 @@
       </table>
     </div>
 
+    <!-- 페이지네이션 -->
+    <div class="pagination">
+  <!-- 첫 페이지와 이전 페이지 -->
+  <button class="page-button" @click="goToFirstPage" :disabled="currentPage === 1">«</button>
+  <button class="page-button" @click="goToPrevPage" :disabled="currentPage === 1">‹</button>
+  
+  <!-- 숫자 버튼 -->
+  <button
+    v-for="page in totalPages"
+    :key="page"
+    @click="goToPage(page)"
+    :class="['page-button', { active: page === currentPage }]"
+  >
+    {{ page }}
+  </button>
+  
+  <!-- 다음 페이지와 마지막 페이지 -->
+  <button class="page-button" @click="goToNextPage" :disabled="currentPage === totalPages">›</button>
+  <button class="page-button" @click="goToLastPage" :disabled="currentPage === totalPages">»</button>
+</div>
+    
     <!-- 상품 상세 모달 -->
     <div v-if="selectedProduct" class="modal-overlay" @click.self="selectedProduct = null">
       <div class="modal-content">
@@ -98,35 +119,44 @@
               <p>{{ selectedProduct.product.join_way || '제한 없음' }}</p>
             </div>
             <div class="info-card">
+              <h5>가입 제한</h5>
+              <p>{{ getJoinDenyText(selectedProduct.product.join_deny) }}</p>
+            </div>
+            <div class="info-card">
               <h5>우대 조건</h5>
               <p>{{ selectedProduct.product.spcl_cnd || '해당 없음' }}</p>
             </div>
           </div>
 
           <div class="rates-table">
-            <h5>금리 정보</h5>
-            <table>
-              <thead>
-                <tr>
-                  <th>가입 기간</th>
-                  <th>금리 유형</th>
-                  <th>기본 금리</th>
-                  <th>최고 우대 금리</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="option in selectedProduct.options" :key="option.id">
-                  <td>{{ option.save_trm }}개월</td>
-                  <td>{{ option.intr_rate_type_nm }}</td>
-                  <td>{{ formatRate(option.intr_rate) }}</td>
-                  <td>{{ formatRate(option.intr_rate2) }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <h4>금리 정보</h4>
+            <div v-for="(options, group) in groupedOptions" :key="group" class="rate-group">
+              <h5>{{ group }}</h5> <!-- 그룹명 출력 -->
+              <table>
+                <thead>
+                  <tr>
+                    <th>가입 기간</th>
+                    <th>금리 유형</th>
+                    <th>기본 금리</th>
+                    <th>최고 우대 금리</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="option in options" :key="option.id">
+                    <td>{{ option.save_trm }}개월</td>
+                    <td>{{ option.intr_rate_type_nm }}</td>
+                    <td>{{ formatRate(option.intr_rate) }}</td>
+                    <td>{{ formatRate(option.intr_rate2) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
+
           <div class="product-notes">
-            <h5>상품 설명</h5>
+            <p>상품 설명</p>
+            <!-- h태그 오류나서 p태그로 수정 -->
             <p>{{ selectedProduct.product.etc_note || '추가 정보 없음' }}</p>
           </div>
 
@@ -160,6 +190,8 @@ const sortColumn = ref(null)
 const sortOrder = ref(null)
 const selectedProduct = ref(null)
 const loading = ref(true)
+const currentPage = ref(1)
+const itemsPerPage = ref(30)
 
 // 초기 데이터 로드
 onMounted(() => {
@@ -173,28 +205,28 @@ onMounted(() => {
     })
 })
 
-
 // 검색 및 필터링된 상품 목록
 const filteredProducts = computed(() => {
-  if (!store.products?.deposits && !store.products?.savings) return []
-  
-  // deposits와 savings 배열을 각각 가공하고 합치기
   let allProducts = []
-  
+
+  // deposits 데이터 처리
   if (store.products.deposits) {
-    const deposits = store.products.deposits.map(item => ({
-      ...item,
-      type: 'deposit'
-    }))
-    allProducts = [...allProducts, ...deposits]
+    allProducts = allProducts.concat(
+      store.products.deposits.map(item => ({
+        ...item,
+        type: 'deposit'
+      }))
+    )
   }
-  
+
+  // savings 데이터 처리
   if (store.products.savings) {
-    const savings = store.products.savings.map(item => ({
-      ...item,
-      type: 'saving'
-    }))
-    allProducts = [...allProducts, ...savings]
+    allProducts = allProducts.concat(
+      store.products.savings.map(item => ({
+        ...item,
+        type: 'saving'
+      }))
+    )
   }
 
   // 상품 유형 필터
@@ -205,7 +237,7 @@ const filteredProducts = computed(() => {
   // 검색어 필터
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase().trim()
-    allProducts = allProducts.filter(product => 
+    allProducts = allProducts.filter(product =>
       product.kor_co_nm.toLowerCase().includes(query) ||
       product.fin_prdt_nm.toLowerCase().includes(query)
     )
@@ -217,6 +249,7 @@ const filteredProducts = computed(() => {
       const rateA = parseFloat(a?.interest_rates?.[sortColumn.value]) || 0
       const rateB = parseFloat(b?.interest_rates?.[sortColumn.value]) || 0
 
+      // NaN 처리 및 정렬
       const valueA = isNaN(rateA) || rateA === -1 ? -Infinity : rateA
       const valueB = isNaN(rateB) || rateB === -1 ? -Infinity : rateB
 
@@ -224,8 +257,48 @@ const filteredProducts = computed(() => {
     })
   }
 
+  // 최종 필터링된 상품 배열 반환
   return allProducts
 })
+
+
+// 페이지네이션
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filteredProducts.value.slice(start, end)
+})
+
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage.value))
+
+const goToPage = page => {
+  if (page >= 1 && page <= totalPages.value) currentPage.value = page
+}
+
+const goToFirstPage = () => (currentPage.value = 1)
+const goToLastPage = () => (currentPage.value = totalPages.value)
+const goToPrevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+const goToNextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+const groupedOptions = computed(() => {
+  if (!selectedProduct.value?.options) return {}
+
+  // 그룹화
+  return selectedProduct.value.options.reduce((acc, option) => {
+    const groupKey = option.rsrv_type_nm || '정보 없음'
+    if (!acc[groupKey]) {
+      acc[groupKey] = []
+    }
+    acc[groupKey].push(option)
+    return acc
+  }, {})
+})
+
+
 
 // 상품 선택 및 상세 정보 조회
 const selectProduct = (product) => {
@@ -289,35 +362,112 @@ const joinProduct = () => {
       alert(errorMessage)
     })
 }
+
+const getJoinDenyText = (joinDeny) => {
+  const denyTexts = {
+    1: '제한 없음',
+    2: '서민전용',
+    3: '일부 제한',
+  }
+  return denyTexts[joinDeny] || '정보 없음'
+} // 가입제한 유형 추가
+
 </script>
 
 <style scoped>
+/* 전체 레이아웃 */
 .financial-products {
   padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
+/* 검색 필터 스타일 */
 .search-filters {
   display: flex;
   gap: 15px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .search-input {
   flex: 1;
   max-width: 400px;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #42b983;
 }
 
 .filter-select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
 }
 
+.filter-select:focus {
+  border-color: #42b983;
+}
+
+/* 페이지네이션 컨테이너 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* 버튼 간 간격 */
+  margin-top: 20px;
+}
+
+/* 공통 버튼 스타일 */
+.page-button {
+  width: 50px; /* 버튼 너비 */
+  height: 50px; /* 버튼 높이 */
+  border: 1px solid #ddd;
+  border-radius: 6px; /* 약간 둥근 모서리 */
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 50px; /* 버튼 높이와 동일하게 설정 */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 호버 효과 */
+.page-button:hover:not(:disabled) {
+  background-color: #42b983;
+  color: #fff;
+  border-color: #42b983;
+}
+
+/* 현재 페이지 버튼 강조 */
+.page-button.active {
+  background-color: #42b983;
+  color: #fff;
+  border-color: #42b983;
+  pointer-events: none; /* 클릭 불가능 */
+}
+
+/* 비활성화 버튼 스타일 */
+.page-button:disabled {
+  background-color: #f1f1f1;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* 테이블 스타일 */
 .table-container {
   overflow-x: auto;
 }
@@ -326,17 +476,19 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin: 20px 0;
+  font-size: 14px;
 }
 
 th, td {
-  padding: 12px;
+  padding: 15px;
   border: 1px solid #ddd;
   text-align: center;
 }
 
 th {
-  background-color: #f8f9fa;
+  background-color: #f1f1f1;
   position: relative;
+  font-weight: bold;
 }
 
 .sort-buttons {
@@ -346,11 +498,16 @@ th {
 }
 
 .sort-buttons button {
-  padding: 0 4px;
+  padding: 2px 5px;
   font-size: 10px;
   border: none;
   background: none;
   cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.sort-buttons button:hover {
+  color: #007bff;
 }
 
 .product-row {
@@ -359,7 +516,62 @@ th {
 }
 
 .product-row:hover {
-  background-color: #f8f9fa;
+  background-color: #f9f9f9;
+}
+
+/* 페이지네이션 컨테이너 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* 공통 버튼 스타일 */
+.page-button {
+  width: 50px; /* 숫자 버튼 너비 */
+  height: 50px; /* 숫자 버튼 높이 */
+  border: 1px solid #ddd;
+  border-radius: 6px; /* 약간 둥근 모서리 */
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 16px; /* 텍스트 크기 */
+  font-weight: bold; /* 텍스트 굵기 */
+  display: flex; /* 중앙 정렬 */
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  cursor: pointer; /* 클릭 가능한 상태 */
+  transition: all 0.3s ease; /* 부드러운 전환 효과 */
+}
+
+/* 좌우 버튼 크기 조정 */
+.page-button.small {
+  width: 40px; /* 좌우 버튼 너비 */
+  height: 40px; /* 좌우 버튼 높이 */
+  font-size: 14px; /* 좌우 버튼 글자 크기 */
+}
+
+/* 호버 효과 (하단 강조 색상 적용) */
+.page-button:hover:not(.active):not(:disabled) {
+  background-color: #42b983; /* 초록 계열 강조 */
+  color: #fff;
+  border-color: #42b983;
+}
+
+/* 현재 페이지 버튼 강조 */
+.page-button.active {
+  background-color: #42b983; /* 현재 페이지 강조 색상 */
+  color: #fff;
+  border-color: #42b983;
+  pointer-events: none; /* 클릭 불가능 */
+}
+
+/* 비활성화 버튼 스타일 */
+.page-button:disabled {
+  background-color: #f1f1f1;
+  color: #aaa;
+  cursor: not-allowed;
 }
 
 /* 모달 스타일 */
@@ -369,7 +581,7 @@ th {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -378,12 +590,13 @@ th {
 
 .modal-content {
   background-color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 90%;
   max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
@@ -396,6 +609,10 @@ th {
   top: 0;
   background-color: white;
   z-index: 1;
+}
+
+.modal-header h3 {
+  margin: 0;
 }
 
 .modal-body {
@@ -425,12 +642,14 @@ th {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: color 0.3s ease;
 }
 
 .close-button:hover {
   color: #343a40;
 }
 
+/* 상세 정보 카드 스타일 */
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -440,29 +659,46 @@ th {
 
 .info-card {
   background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
+.info-card h5 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  /* color: #42b983; */
+}
+
+.info-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* 기타 스타일 */
 .product-notes {
   background-color: #f8f9fa;
   padding: 15px;
   border-radius: 6px;
   margin: 20px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .join-button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
+  padding: 12px 20px;
+  background-color: #28a745;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-size: 16px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .join-button:hover {
-  background-color: #45a049;
+  background-color: #218838;
 }
 
 @media (max-width: 768px) {
@@ -477,7 +713,7 @@ th {
   .info-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .modal-content {
     width: 95%;
     margin: 10px;

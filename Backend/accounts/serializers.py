@@ -16,16 +16,12 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = get_user_model().objects.create_user(
             username=validated_data['username'],
-            password=validated_data['password']
+            password=validated_data['password'],
+            email=validated_data.get('email', ''),  # 이메일 저장
+            name=validated_data.get('name', ''),    # 이름 저장
+            age=validated_data.get('age'),          # 나이 저장
+            address=validated_data.get('address', ''),  # 주소 저장
+            wealth=validated_data.get('wealth'),    # 재산 저장
+            salary=validated_data.get('salary'),    # 월수입 저장
         )
         return user
-
-    def update(self, instance, validated_data):
-        # Update only writable fields
-        for attr, value in validated_data.items():
-            if attr == 'password':
-                instance.set_password(value)
-            else:
-                setattr(instance, attr, value)
-        instance.save()
-        return instance

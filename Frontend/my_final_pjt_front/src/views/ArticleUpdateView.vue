@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <GoToBack :goName="{ name: 'ArticleList', query: { page: 1 } }" />
-    <h1>글 쓰기</h1>
+    <GoToBack :goName="{ name: 'ArticleDetail', params: { id: postId }, query: { page: pageNum }}" />
+    <h1>게시글 수정하기</h1>
     <v-form class="my-5">
       <v-text-field
         variant="outlined"
@@ -11,7 +11,7 @@
         :error-messages="v$.title.$errors.map(e => e.$message)"
         @input="v$.title.$touch"
         @blur="v$.title.$touch"
-        @keypress.enter="createPost"
+        @keypress.enter.prevent="updatePost"
       ></v-text-field>
       <v-textarea
         variant="outlined"
@@ -30,17 +30,17 @@
         block
         variant="flat"
         color="#1089FF"
-        @click.prevent="createPost"
+        @click.prevent="updatePost"
       >
-        게시물 포스팅
+        게시물 수정하기
       </v-btn>
     </v-form>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useCounterStore } from '@/stores/counter'
 import { useVuelidate } from '@vuelidate/core'
 import { required, maxLength, helpers } from '@vuelidate/validators'
@@ -54,8 +54,12 @@ const state = ref({
   ...initialState
 })
 
+const route = useRoute()
 const router = useRouter()
 const store = useCounterStore()
+
+const postId = route.params.id
+const pageNum = route.query.page
 
 const rules = {
   title: {
@@ -70,13 +74,24 @@ const rules = {
 
 const v$ = useVuelidate(rules, state)
 
-const createPost = () => {
+onMounted(() => {
+  store.getArticleDetail(postId)
+    .then((res) => {
+      state.value.title = res.title
+      state.value.content = res.content
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+})
+
+const updatePost = () => {
   v$.value.$validate()
 
   if (!v$.value.$error) {
-    store.createArticle(state.value)
+    store.updateArticle(postId, state.value)
       .then((res) => {
-        router.push({ name: 'ArticleDetail', params: { id: res.id }, query: { page: 1 } })
+        router.push({ name: 'ArticleDetail', params: { id: res.id }, query: { page: pageNum } })
       })
       .catch((err) => {
         console.log(err)

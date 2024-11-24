@@ -4,9 +4,10 @@ import HomeView from '@/views/HomeView.vue'
 import ArticleList from '@/views/ArticleListView.vue'
 import ArticleDetail from '@/views/ArticleDetailView.vue'
 import ArticleCreate from '@/views/ArticleCreateView.vue'
+import ArticleUpdateView from '@/views/ArticleUpdateView.vue'
 import BankMapView from '@/views/BankMapView.vue'
 import FinancialProductsView from '@/views/FinancialProductsView.vue'
-import ProductDetailView from '@/views/ProductDetailView.vue'
+// import ProductDetailView from '@/views/ProductDetailView.vue'
 import SignUpView from '@/views/SignUpView.vue'
 import LogInView from '@/views/LoginView.vue'
 import ProfileView from '@/views/ProfileView.vue'
@@ -82,24 +83,46 @@ const router = createRouter({
       }
     },
     {
+      path: '/articles/:id/edit',
+      name: 'ArticleUpdate',
+      component: ArticleUpdateView,
+      beforeEnter: (to, from) => {
+        const store = useCounterStore()
+        if (!store.isLogin) {
+          alert('로그인 후 이용 가능합니다.')
+          return { name: 'LogInView'}
+        }
+      }
+    },
+    {
       path: '/bankmap',
       name: 'BankMap',
       component: BankMapView
+    },
+    {
+      path: '/products', // 상품 목록 페이지 경로
+      name: 'FinancialProductsView',
+      component: FinancialProductsView
     },
     {
       path: '/financial-products',
       name: 'FinancialProducts',
       component: FinancialProductsView
     },
-    {
-      path: '/product/:type/:id',
-      name: 'ProductDetail',
-      component: ProductDetailView,
-      props: true
-    },
+    // {
+    //   path: '/product/:type/:id',
+    //   name: 'ProductDetail',
+    //   component: ProductDetailView,
+    //   props: true
+    // },
     {
       path: '/exchange-calculator',
       name: 'ExchangeCalculator',
+      component: ExchangeCalculatorView
+    },
+    {
+      path: '/calculator', // 실제 경로
+      name: 'ExchangeCalculatorView', // 이 이름으로 라우팅됨
       component: ExchangeCalculatorView
     }
   ]

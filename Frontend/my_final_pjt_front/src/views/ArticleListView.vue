@@ -1,41 +1,137 @@
 <template>
-  <div>
-    <h1>게시글 목록</h1>
-    <RouterLink 
-      v-if="store.isLogin"
-      :to="{ name: 'ArticleCreate' }"
-      class="btn-create"
-    >
-      글쓰기
-    </RouterLink>
-
-    <ul class="article-list">
-      <li v-for="article in articles" :key="article.id" class="article-item">
-        <RouterLink :to="{ name: 'ArticleDetail', params: { id: article.id }}">
-          <h3>{{ article.title }}</h3>
-          <p>작성자: {{ article.user.username }}</p>
-          <p>댓글: {{ article.comments_count }}</p>
-        </RouterLink>
-      </li>
-    </ul>
+  <div class="container">
+    <div class="d-flex justify-space-between align-end">
+      <h1>게시글 목록</h1>
+      <v-btn
+        variant="flat"
+        color="#1089FF"
+        :to="{ name: 'ArticleCreate' }"
+      >글 쓰기</v-btn>
+    </div>
+    <table class="elevation-6">
+      <thead>
+        <tr>
+          <th class="left-align">번호</th>
+          <th class="center-align">제목</th>
+          <th class="right-align">글쓴이</th>
+          <th class="right-align">조회수</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in articles" :key="item.id" @click="clickTr(item)">
+          <td class="number-align">{{ item.id }}</td> <!-- 게시글 번호 -->
+          <td class="center-align">{{ item.title }} [{{ item.comments_count }}]</td> <!-- 제목과 댓글 수 -->
+          <td class="right-align">
+            <v-avatar size="small">
+              <v-img
+                cover
+                :src="`${store.API_URL}${item.user.profile_img}`"
+                alt="profile-img"
+              ></v-img>
+            </v-avatar>
+            {{ item.user.username }} <!-- 작성자 -->
+          </td>
+          <td class="views-align">{{ item.views }}</td> <!-- 조회수 -->
+        </tr>
+      </tbody>
+    </table>
+    <v-pagination
+      v-model="page"
+      :length="totalPages"
+      :total-visible="6"
+      color="#1089FF"
+      rounded="circle"
+    ></v-pagination>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCounterStore } from '@/stores/counter'
-import { RouterLink } from 'vue-router'
 
 const store = useCounterStore()
+const router = useRouter()
+const page = ref(1)
 const articles = ref([])
+const totalPages = ref(1)
 
-onMounted(() => {
-  store.getArticles()
+watch(page, () => {
+  fetchArticles()
+  window.scrollTo({ left: 0, top: 0, behavior: "smooth" })
+  router.push({ name: 'ArticleList', query: { page: page.value } })
+})
+
+const fetchArticles = () => {
+  store.getArticles(page.value)
     .then((response) => {
       articles.value = response.results
+      totalPages.value = Math.ceil(response.count / 10) // assuming 10 articles per page
     })
     .catch((err) => {
       console.log(err)
     })
+}
+
+const clickTr = (item) => {
+  console.log('Clicked item:', item); // 디버깅을 위해 item 객체 출력
+  if (item && item.id) {
+    router.push({ name: 'ArticleDetail', params: { id: item.id }, query: { page: page.value } })
+  } else {
+    console.error('Missing required param "id"')
+  }
+}
+
+onMounted(() => {
+  fetchArticles()
 })
 </script>
+
+<style scoped>
+.container {
+  width: 1000px;
+  margin: 2rem auto;
+}
+
+.elevation-6 {
+  border-radius: 5px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.left-align {
+  text-align: left;
+}
+
+.center-align {
+  text-align: center;
+}
+
+.right-align {
+  text-align: right;
+}
+
+.number-align {
+  text-align: left;
+  padding-left: 20px; /* 번호를 조금 더 오른쪽으로 */
+}
+
+.views-align {
+  text-align: right;
+  padding-right: 20px; /* 조회수를 조금 더 왼쪽으로 */
+}
+
+tbody > tr {
+  transition: 200ms;
+  cursor: pointer;
+}
+
+tbody > tr:hover {
+  background-color: rgb(247, 250, 253);
+}
+</style>

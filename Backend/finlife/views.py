@@ -113,6 +113,7 @@ def save_saving_products(request):
     for option in response.get('result', {}).get('optionList', []):
         fin_prdt_cd = option.get('fin_prdt_cd')
         intr_rate_type_nm = option.get('intr_rate_type_nm')
+        rsrv_type_nm = option.get('rsrv_type_nm')
         intr_rate = option.get('intr_rate')
         intr_rate2 = option.get('intr_rate2')
         save_trm = option.get('save_trm')
@@ -129,6 +130,7 @@ def save_saving_products(request):
         option_data = {
             'fin_prdt_cd': saving_product.fin_prdt_cd,
             'intr_rate_type_nm': intr_rate_type_nm,
+            'rsrv_type_nm': rsrv_type_nm,
             'intr_rate': intr_rate if intr_rate is not None else -1,
             'intr_rate2': intr_rate2 if intr_rate2 is not None else -1,
             'save_trm': save_trm,
@@ -241,7 +243,7 @@ def product_detail(request, product_type, product_id):
         product = DepositProducts.objects.filter(id=product_id).first()
         if not product:
             return Response({"error": "Deposit product not found"}, status=404)
-        options = DepositOptions.objects.filter(product=product)
+        options = DepositOptions.objects.filter(product=product).order_by('save_trm')
         product_serializer = DepositProductsSerializer(product)
         option_serializer = DepositOptionsSerializer(options, many=True)
         return Response({
@@ -253,7 +255,7 @@ def product_detail(request, product_type, product_id):
         product = SavingProducts.objects.filter(id=product_id).first()
         if not product:
             return Response({"error": "Saving product not found"}, status=404)
-        options = SavingOptions.objects.filter(product=product)
+        options = SavingOptions.objects.filter(product=product).order_by('save_trm')
         product_serializer = SavingProductsSerializer(product)
         option_serializer = SavingOptionsSerializer(options, many=True)
         return Response({
@@ -262,6 +264,7 @@ def product_detail(request, product_type, product_id):
         })
 
     return Response({"error": "Invalid product type"}, status=400)
+
 
 
 @api_view(['POST'])

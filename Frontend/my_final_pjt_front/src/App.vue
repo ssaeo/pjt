@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <v-app>
     <nav class="navbar">
       <div class="nav-links">
         <RouterLink :to="{ name: 'home' }">Home</RouterLink> |
@@ -23,7 +23,7 @@
     </nav>
 
     <RouterView />
-  </div>
+  </v-app>
 </template>
 
 <script setup>

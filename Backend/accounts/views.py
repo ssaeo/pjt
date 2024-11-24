@@ -24,7 +24,6 @@ def signup(request):
             'token': token.key
         }, status=status.HTTP_201_CREATED)
 
-
 @api_view(['POST'])
 def login(request):
     username = request.data.get('username')
@@ -34,13 +33,17 @@ def login(request):
     
     if user:
         token, created = Token.objects.get_or_create(user=user)
+        # UserSerializer를 사용하여 사용자 정보 직렬화
+        serializer = UserSerializer(user, context={'request': request})
         return Response({
             'token': token.key,
-            'username': user.username
+            'user': serializer.data
         })
     else:
-        return Response({'error': '잘못된 로그인 정보입니다.'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        return Response(
+            {'error': '잘못된 사용자 이름 또는 비밀번호입니다.'}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -51,28 +54,20 @@ def logout(request):
     request.user.auth_token.delete()
     return Response({'message': '로그아웃 되었습니다.'}, status=status.HTTP_200_OK)
 
-
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def profile(request, username):
-    """
-    프로필 페이지
-    - GET: 프로필 정보 조회
-    - PUT: 회원 정보 수정
-    - DELETE: 회원 탈퇴
-    """
     user = get_object_or_404(User, username=username)
     
-    # 본인 계정만 수정/삭제 가능
     if request.method in ['PUT', 'DELETE'] and request.user.username != username:
         return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user, context={'request': request})
         return Response(serializer.data)
     
     elif request.method == 'PUT':
-        serializer = UserSerializer(user, data=request.data, partial=True)
+        serializer = UserSerializer(user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
