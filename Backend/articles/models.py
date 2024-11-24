@@ -7,6 +7,7 @@ class Article(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    views = models.IntegerField(default=0)  # 조회수 필드 추가
 
     def __str__(self):
         return self.title

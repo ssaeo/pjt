@@ -9,7 +9,6 @@ from django.contrib.auth import get_user_model
 from .serializers import ArticleListSerializer, ArticleSerializer, CommentSerializer
 from .models import Article, Comment
 
-
 @api_view(['GET', 'POST'])
 def article_list(request):
     if request.method == 'GET':
@@ -29,12 +28,13 @@ def article_list(request):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
 @api_view(['GET', 'PUT', 'DELETE'])
 def article_detail(request, article_pk):
     article = get_object_or_404(Article, pk=article_pk)
     
     if request.method == 'GET':
+        article.views += 1  # 조회수 증가
+        article.save()
         serializer = ArticleSerializer(article)
         return Response(serializer.data)
     
@@ -54,14 +54,12 @@ def article_detail(request, article_pk):
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
 @api_view(['GET'])
 def user_article_list(request, username):
     user = get_object_or_404(get_user_model(), username=username)
     articles = user.articles.all()
     serializer = ArticleListSerializer(articles, many=True)
     return Response(serializer.data)
-
 
 @api_view(['GET', 'POST'])
 def comment_list(request, article_pk):
@@ -80,7 +78,6 @@ def comment_list(request, article_pk):
         if serializer.is_valid(raise_exception=True):
             serializer.save(article=article, user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])

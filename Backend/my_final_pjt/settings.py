@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'accounts',     # accounts 앱
     'articles',     # article 앱
     'finlife',
-    'bankmap',
     'rest_framework',   # restframework
     'rest_framework.authtoken',
     'dj_rest_auth',
