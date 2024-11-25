@@ -20,35 +20,34 @@
       <div class="d-flex justify-space-between">
         <div class="left">
           <span class="text-h7">작성일 : {{ formatDate(article.created_at) }}</span>
-          <span class="text-h7 ml-3">수정일 : {{ formatDate(article.updated_at) }}</span> <!-- 간격 추가 -->
+          <span class="text-h7 ml-3">수정일 : {{ formatDate(article.updated_at) }}</span>
         </div>
         <div class="right">
           <span class="text-h7">조회수: {{ article.views }}</span>
         </div>
-        
       </div>
     </header>
     <v-divider class="my-3"></v-divider>
 
-    <main>
+    <main class="position-relative" style="min-height: 200px;"> <!-- 최소 높이 설정 -->
       <article class="text-h5 my-10">
         <div v-html="article.content"></div>
       </article>
-      <div v-if="isPostedUser" class="right">
-          <v-btn
-            class="mr-2"
-            size="small"
-            variant="tonal"
-            color="green-darken-2"
-            :to="{ name: 'ArticleUpdate', params: { id: article.id }, query: { page: pageNum }}"
-          >수정</v-btn>
-          <v-btn
-            size="small"
-            variant="tonal"
-            color="red-darken-2"
-            @click.prevent="deleteArticle"
-          >삭제</v-btn>
-        </div>
+      <div v-if="isPostedUser" class="edit-buttons">
+        <v-btn
+          class="mr-2"
+          size="small"
+          variant="tonal"
+          color="green-darken-2"
+          :to="{ name: 'ArticleUpdate', params: { id: article.id }, query: { page: pageNum }}"
+        >수정</v-btn>
+        <v-btn
+          size="small"
+          variant="tonal"
+          color="red-darken-2"
+          @click.prevent="deleteArticle"
+        >삭제</v-btn>
+      </div>
     </main>
     <v-divider class="my-3"></v-divider>
 
@@ -212,6 +211,7 @@ const editComment = (commentId, currentContent) => {
 .container {
   width: 1000px;
   margin: 2rem auto;
+  position: relative; /* 부모 요소에 position-relative 추가 */
 }
 
 .comment-left {
@@ -227,5 +227,14 @@ const editComment = (commentId, currentContent) => {
 
 .ml-3 {
   margin-left: 1rem; /* 간격 추가 */
+}
+
+.edit-buttons {
+  position: absolute;
+  right: 0;
+  bottom: 20px; /* 하단에 고정 */
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 </style>

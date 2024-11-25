@@ -2,7 +2,9 @@
   <v-container class="container" v-if="store.user">
     <v-card class="pa-5">
       <v-card-title class="title">
-        <h1>{{ store.user.name }}님의 프로필 페이지</h1>
+        <h1>
+          <span class="user-name">{{ store.user.name }}</span>님의 프로필 페이지
+        </h1>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
@@ -309,5 +311,8 @@ const getJoinDenyText = (joinDeny) => {
   word-wrap: break-word; /* 긴 단어를 줄바꿈 */
 }
 
+.user-name {
+  color: #42b983; /* 원하는 색상으로 변경 */
+}
 
 </style>

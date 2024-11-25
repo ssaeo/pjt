@@ -23,12 +23,16 @@
     </nav>
 
     <RouterView />
+
+    <!-- Footer 컴포넌트 추가 -->
+    <Footer />
   </v-app>
 </template>
 
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import { useCounterStore } from '@/stores/counter'
+import Footer from '@/components/Footer.vue' // Footer 컴포넌트 가져오기
 
 const store = useCounterStore()
 
