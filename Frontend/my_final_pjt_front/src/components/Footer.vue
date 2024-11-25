@@ -20,7 +20,7 @@
     <v-divider></v-divider>
 
     <div>
-      {{ new Date().getFullYear() }} — <strong>Vuetify</strong>
+      {{ new Date().getFullYear() }} — <strong>FIPL</strong>
     </div>
   </v-footer>
 </template>
@@ -44,6 +44,9 @@ const goHome = () => {
   background-color: #26A69A !important; /* Vuetify의 indigo lighten-1 색상 */
 }
 
+.v-footer {
+  width: 100%;
+}
 .text-center {
   text-align: center;
 }
@@ -64,4 +67,5 @@ const goHome = () => {
 .pt-0 {
   padding-top: 0;
 }
+
 </style>

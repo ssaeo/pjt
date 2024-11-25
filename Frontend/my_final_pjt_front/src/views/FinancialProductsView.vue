@@ -1,178 +1,123 @@
 <template>
-  <div class="financial-products">
-    <h2>금융상품 목록</h2>
-    
-    <!-- 검색 필터 -->
-    <div class="search-filters">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="은행명 또는 상품명으로 검색"
-        class="search-input"
-      />
-      <select v-model="productTypeFilter" class="filter-select">
-        <option value="">전체 상품</option>
-        <option value="deposit">예금</option>
-        <option value="saving">적금</option>
-      </select>
-    </div>
+  <v-container class="financial-products">
+    <v-card class="mx-auto pa-4" elevation="8" max-width="1200">
+      <h2 class="text-center" style="color: #26A69A;">금융상품 목록</h2>
 
-    <!-- 상품 목록 테이블 -->
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>상품 유형</th>
-            <th>은행명</th>
-            <th>상품명</th>
-            <th>
-              6개월 금리
-              <div class="sort-buttons">
-                <button @click="sortByRate('6', 'desc')">▲</button>
-                <button @click="sortByRate('6', 'asc')">▼</button>
-              </div>
-            </th>
-            <th>
-              12개월 금리
-              <div class="sort-buttons">
-                <button @click="sortByRate('12', 'desc')">▲</button>
-                <button @click="sortByRate('12', 'asc')">▼</button>
-              </div>
-            </th>
-            <th>
-              24개월 금리
-              <div class="sort-buttons">
-                <button @click="sortByRate('24', 'desc')">▲</button>
-                <button @click="sortByRate('24', 'asc')">▼</button>
-              </div>
-            </th>
-            <th>
-              36개월 금리
-              <div class="sort-buttons">
-                <button @click="sortByRate('36', 'desc')">▲</button>
-                <button @click="sortByRate('36', 'asc')">▼</button>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr 
-            v-for="product in paginatedProducts"
-            :key="`${product.type}-${product.id}`"
-            @click="selectProduct(product)"
-            class="product-row"
-          >
-            <td>{{ product.type === 'deposit' ? '예금' : '적금' }}</td>
-            <td>{{ product.kor_co_nm }}</td>
-            <td>{{ product.fin_prdt_nm }}</td>
-            <td>{{ formatRate(product?.interest_rates?.['6']) }}</td>
-            <td>{{ formatRate(product?.interest_rates?.['12']) }}</td>
-            <td>{{ formatRate(product?.interest_rates?.['24']) }}</td>
-            <td>{{ formatRate(product?.interest_rates?.['36']) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <!-- 검색 필터 -->
+      <v-row class="mb-4">
+        <v-col cols="12" md="6">
+          <v-text-field
+            v-model="searchQuery"
+            label="은행명 또는 상품명으로 검색"
+            variant="outlined"
+            color="#26A69A"
+            dense
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-select
+            v-model="productTypeFilter"
+            :items="productTypes"
+            item-title="text"
+            item-value="value"
+            label="상품 유형"
+            variant="outlined"
+            color="#26A69A"
+            dense
+          ></v-select>
+        </v-col>
+      </v-row>
 
-    <!-- 페이지네이션 -->
-    <div class="pagination">
-  <!-- 첫 페이지와 이전 페이지 -->
-  <button class="page-button" @click="goToFirstPage" :disabled="currentPage === 1">«</button>
-  <button class="page-button" @click="goToPrevPage" :disabled="currentPage === 1">‹</button>
-  
-  <!-- 숫자 버튼 -->
-  <button
-    v-for="page in totalPages"
-    :key="page"
-    @click="goToPage(page)"
-    :class="['page-button', { active: page === currentPage }]"
-  >
-    {{ page }}
-  </button>
-  
-  <!-- 다음 페이지와 마지막 페이지 -->
-  <button class="page-button" @click="goToNextPage" :disabled="currentPage === totalPages">›</button>
-  <button class="page-button" @click="goToLastPage" :disabled="currentPage === totalPages">»</button>
-</div>
-    
+      <!-- 상품 목록 테이블 -->
+      <v-data-table
+        :headers="headers"
+        :items="paginatedProducts"
+        :items-per-page="itemsPerPage"
+        class="elevation-1"
+        dense
+      >
+        <template v-slot:item="{ item }">
+          <tr @click="selectProduct(item)">
+            <td>{{ item.type === 'deposit' ? '예금' : '적금' }}</td>
+            <td>{{ item.kor_co_nm }}</td>
+            <td>{{ item.fin_prdt_nm }}</td>
+            <td>{{ formatRate(item.interest_rates['6']) }}</td>
+            <td>{{ formatRate(item.interest_rates['12']) }}</td>
+            <td>{{ formatRate(item.interest_rates['24']) }}</td>
+            <td>{{ formatRate(item.interest_rates['36']) }}</td>
+          </tr>
+        </template>
+      </v-data-table>
+
+      <!-- 페이지네이션 -->
+      <v-pagination
+        v-model="currentPage"
+        :length="totalPages"
+        class="mt-4"
+        color="#26A69A"
+      ></v-pagination>
+    </v-card>
+
     <!-- 상품 상세 모달 -->
-    <div v-if="selectedProduct" class="modal-overlay" @click.self="selectedProduct = null">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>상품 상세 정보</h3>
-          <button @click="selectedProduct = null" class="close-button">×</button>
-        </div>
-
-        <div class="modal-body">
+    <v-dialog v-model="isDialogOpen" max-width="800px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">상품 상세 정보</span>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="isDialogOpen = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text v-if="selectedProductData">
           <div class="product-header">
-            <h4>{{ selectedProduct.product.fin_prdt_nm }}</h4>
-            <span class="bank-badge">{{ selectedProduct.product.kor_co_nm }}</span>
+            <h4>{{ selectedProductData.product.fin_prdt_nm }}</h4>
+            <span class="bank-badge">{{ selectedProductData.product.kor_co_nm }}</span>
           </div>
 
-          <div class="info-grid">
-            <div class="info-card">
-              <h5>가입 대상</h5>
-              <p>{{ selectedProduct.product.join_member || '제한 없음' }}</p>
-            </div>
-            <div class="info-card">
-              <h5>가입 방법</h5>
-              <p>{{ selectedProduct.product.join_way || '제한 없음' }}</p>
-            </div>
-            <div class="info-card">
-              <h5>가입 제한</h5>
-              <p>{{ getJoinDenyText(selectedProduct.product.join_deny) }}</p>
-            </div>
-            <div class="info-card">
-              <h5>우대 조건</h5>
-              <p>{{ selectedProduct.product.spcl_cnd || '해당 없음' }}</p>
-            </div>
-          </div>
+          <v-row class="info-grid">
+            <v-col cols="12" md="6" v-for="info in productInfo" :key="info.title">
+              <v-card class="info-card">
+                <v-card-title>{{ info.title }}</v-card-title>
+                <v-card-text>{{ info.content }}</v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
 
-          <div class="rates-table">
-            <h4>금리 정보</h4>
-            <div v-for="(options, group) in groupedOptions" :key="group" class="rate-group">
-              <h5>{{ group }}</h5> <!-- 그룹명 출력 -->
-              <table>
-                <thead>
-                  <tr>
-                    <th>가입 기간</th>
-                    <th>금리 유형</th>
-                    <th>기본 금리</th>
-                    <th>최고 우대 금리</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="option in options" :key="option.id">
-                    <td>{{ option.save_trm }}개월</td>
-                    <td>{{ option.intr_rate_type_nm }}</td>
-                    <td>{{ formatRate(option.intr_rate) }}</td>
-                    <td>{{ formatRate(option.intr_rate2) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <v-divider></v-divider>
 
+          <h4>금리 정보</h4>
+          <v-row v-for="(options, group) in groupedOptions" :key="group" class="rate-group">
+            <v-col cols="12">
+              <h5>{{ group }}</h5>
+              <v-data-table
+                :headers="rateHeaders"
+                :items="options"
+                class="elevation-1"
+                dense
+              ></v-data-table>
+            </v-col>
+          </v-row>
+
+          <v-divider></v-divider>
 
           <div class="product-notes">
             <p>상품 설명</p>
-            <!-- h태그 오류나서 p태그로 수정 -->
-            <p>{{ selectedProduct.product.etc_note || '추가 정보 없음' }}</p>
+            <p>{{ selectedProductData.product.etc_note || '추가 정보 없음' }}</p>
           </div>
-
-          <div class="modal-actions">
-            <button 
-              v-if="store.isLogin" 
-              @click="joinProduct" 
-              class="join-button"
-            >
-              가입하기
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            v-if="store.isLogin"
+            color="success"
+            @click="joinProduct"
+          >
+            가입하기
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-container>
 </template>
 
 <script setup>
@@ -188,7 +133,8 @@ const searchQuery = ref('')
 const productTypeFilter = ref('')
 const sortColumn = ref(null)
 const sortOrder = ref(null)
-const selectedProduct = ref(null)
+const isDialogOpen = ref(false)
+const selectedProductData = ref(null)
 const loading = ref(true)
 const currentPage = ref(1)
 const itemsPerPage = ref(30)
@@ -261,7 +207,6 @@ const filteredProducts = computed(() => {
   return allProducts
 })
 
-
 // 페이지네이션
 const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
@@ -285,10 +230,10 @@ const goToNextPage = () => {
 }
 
 const groupedOptions = computed(() => {
-  if (!selectedProduct.value?.options) return {}
+  if (!selectedProductData.value?.options) return {}
 
   // 그룹화
-  return selectedProduct.value.options.reduce((acc, option) => {
+  return selectedProductData.value.options.reduce((acc, option) => {
     const groupKey = option.rsrv_type_nm || '정보 없음'
     if (!acc[groupKey]) {
       acc[groupKey] = []
@@ -298,18 +243,19 @@ const groupedOptions = computed(() => {
   }, {})
 })
 
-
-
 // 상품 선택 및 상세 정보 조회
 const selectProduct = (product) => {
-  console.log('선택된 상품 원본:', product)  // 디버깅용 로그
-  
+  if (!product || !product.type || !product.id) {
+    console.error('상품 정보가 올바르지 않습니다:', product)
+    alert('상품 정보를 불러오는데 실패했습니다.')
+    return
+  }
+
   store.fetchProductDetail(product.type, product.id)
     .then((detail) => {
-      // 상품 타입 정보 추가
-      detail.product.type = product.type  // 이 부분이 중요
-      console.log('가공된 상세 정보:', detail)
-      selectedProduct.value = detail
+      detail.product.type = product.type
+      selectedProductData.value = detail
+      isDialogOpen.value = true
     })
     .catch((err) => {
       console.error('상품 상세 정보 조회 실패:', err)
@@ -338,15 +284,9 @@ const joinProduct = () => {
     return
   }
 
-  console.log('selectedProduct:', selectedProduct.value)
+  const productType = selectedProductData.value.product.type
+  const productId = selectedProductData.value.product.id
 
-  // product 객체에서 직접 type과 id를 가져옴
-  const productType = selectedProduct.value.product.type  // type 필드가 있는지 확인 필요
-  const productId = selectedProduct.value.product.id
-
-  console.log('전송할 데이터:', { productType, productId })
-
-  // 값이 없는 경우 처리
   if (!productType || !productId) {
     alert('상품 정보가 올바르지 않습니다.')
     return
@@ -355,7 +295,7 @@ const joinProduct = () => {
   store.joinFinancialProduct(productType, productId)
     .then(() => {
       alert('상품 가입이 완료되었습니다.')
-      selectedProduct.value = null
+      isDialogOpen.value = false
     })
     .catch((err) => {
       const errorMessage = err.response?.data?.message || '상품 가입에 실패했습니다.'
@@ -370,353 +310,65 @@ const getJoinDenyText = (joinDeny) => {
     3: '일부 제한',
   }
   return denyTexts[joinDeny] || '정보 없음'
-} // 가입제한 유형 추가
+}
 
+const productTypes = [
+  { text: '전체 상품', value: '' },
+  { text: '예금', value: 'deposit' },
+  { text: '적금', value: 'saving' }
+]
+
+const headers = [
+  { text: '상품 유형', value: 'type' },
+  { text: '은행명', value: 'kor_co_nm' },
+  { text: '상품명', value: 'fin_prdt_nm' },
+  { text: '6개월 금리', value: '6' },
+  { text: '12개월 금리', value: '12' },
+  { text: '24개월 금리', value: '24' },
+  { text: '36개월 금리', value: '36' }
+]
+
+const rateHeaders = [
+  { text: '가입 기간', value: 'save_trm' },
+  { text: '금리 유형', value: 'intr_rate_type_nm' },
+  { text: '기본 금리', value: 'intr_rate' },
+  { text: '최고 우대 금리', value: 'intr_rate2' }
+]
+
+const productInfo = computed(() => [
+  { title: '가입 대상', content: selectedProductData.value?.product.join_member || '제한 없음' },
+  { title: '가입 방법', content: selectedProductData.value?.product.join_way || '제한 없음' },
+  { title: '가입 제한', content: getJoinDenyText(selectedProductData.value?.product.join_deny) },
+  { title: '우대 조건', content: selectedProductData.value?.product.spcl_cnd || '해당 없음' }
+])
 </script>
 
 <style scoped>
-/* 전체 레이아웃 */
 .financial-products {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
 }
 
-/* 검색 필터 스타일 */
-.search-filters {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.search-input {
-  flex: 1;
-  max-width: 400px;
-  padding: 10px 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 16px;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.search-input:focus {
-  border-color: #42b983;
-}
-
-.filter-select {
-  padding: 10px 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 16px;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.filter-select:focus {
-  border-color: #42b983;
-}
-
-/* 페이지네이션 컨테이너 */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px; /* 버튼 간 간격 */
-  margin-top: 20px;
-}
-
-/* 공통 버튼 스타일 */
-.page-button {
-  width: 50px; /* 버튼 너비 */
-  height: 50px; /* 버튼 높이 */
-  border: 1px solid #ddd;
-  border-radius: 6px; /* 약간 둥근 모서리 */
-  background-color: #f9f9f9;
-  color: #333;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 50px; /* 버튼 높이와 동일하게 설정 */
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* 호버 효과 */
-.page-button:hover:not(:disabled) {
-  background-color: #42b983;
-  color: #fff;
-  border-color: #42b983;
-}
-
-/* 현재 페이지 버튼 강조 */
-.page-button.active {
-  background-color: #42b983;
-  color: #fff;
-  border-color: #42b983;
-  pointer-events: none; /* 클릭 불가능 */
-}
-
-/* 비활성화 버튼 스타일 */
-.page-button:disabled {
-  background-color: #f1f1f1;
-  color: #aaa;
-  cursor: not-allowed;
-}
-
-/* 테이블 스타일 */
-.table-container {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 20px 0;
-  font-size: 14px;
-}
-
-th, td {
-  padding: 15px;
-  border: 1px solid #ddd;
-  text-align: center;
-}
-
-th {
-  background-color: #f1f1f1;
-  position: relative;
-  font-weight: bold;
-}
-
-.sort-buttons {
-  display: inline-flex;
-  flex-direction: column;
-  margin-left: 5px;
-}
-
-.sort-buttons button {
-  padding: 2px 5px;
-  font-size: 10px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.sort-buttons button:hover {
-  color: #007bff;
-}
-
-.product-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.product-row:hover {
-  background-color: #f9f9f9;
-}
-
-/* 페이지네이션 컨테이너 */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-top: 20px;
-}
-
-/* 공통 버튼 스타일 */
-.page-button {
-  width: 50px; /* 숫자 버튼 너비 */
-  height: 50px; /* 숫자 버튼 높이 */
-  border: 1px solid #ddd;
-  border-radius: 6px; /* 약간 둥근 모서리 */
-  background-color: #f9f9f9;
-  color: #333;
-  font-size: 16px; /* 텍스트 크기 */
-  font-weight: bold; /* 텍스트 굵기 */
-  display: flex; /* 중앙 정렬 */
-  justify-content: center; /* 가로 중앙 정렬 */
-  align-items: center; /* 세로 중앙 정렬 */
-  cursor: pointer; /* 클릭 가능한 상태 */
-  transition: all 0.3s ease; /* 부드러운 전환 효과 */
-}
-
-/* 좌우 버튼 크기 조정 */
-.page-button.small {
-  width: 40px; /* 좌우 버튼 너비 */
-  height: 40px; /* 좌우 버튼 높이 */
-  font-size: 14px; /* 좌우 버튼 글자 크기 */
-}
-
-/* 호버 효과 (하단 강조 색상 적용) */
-.page-button:hover:not(.active):not(:disabled) {
-  background-color: #42b983; /* 초록 계열 강조 */
-  color: #fff;
-  border-color: #42b983;
-}
-
-/* 현재 페이지 버튼 강조 */
-.page-button.active {
-  background-color: #42b983; /* 현재 페이지 강조 색상 */
-  color: #fff;
-  border-color: #42b983;
-  pointer-events: none; /* 클릭 불가능 */
-}
-
-/* 비활성화 버튼 스타일 */
-.page-button:disabled {
-  background-color: #f1f1f1;
-  color: #aaa;
-  cursor: not-allowed;
-}
-
-/* 모달 스타일 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
+.v-card {
   background-color: white;
   border-radius: 12px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-.modal-header {
-  padding: 20px;
-  border-bottom: 1px solid #dee2e6;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  background-color: white;
-  z-index: 1;
+.v-data-table {
+  margin-top: 20px;
 }
 
-.modal-header h3 {
-  margin: 0;
-}
-
-.modal-body {
-  padding: 20px;
-}
-
-.modal-actions {
-  padding: 20px;
-  border-top: 1px solid #dee2e6;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  position: sticky;
-  bottom: 0;
-  background-color: white;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #6c757d;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
+.v-pagination {
   justify-content: center;
-  transition: color 0.3s ease;
 }
 
-.close-button:hover {
-  color: #343a40;
+.headline {
+  color: #26A69A;
 }
 
-/* 상세 정보 카드 스타일 */
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.info-card {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.info-card h5 {
-  margin: 0 0 10px;
-  font-size: 16px;
-  /* color: #42b983; */
-}
-
-.info-card p {
-  margin: 0;
-  font-size: 14px;
-  color: #333;
-}
-
-/* 기타 스타일 */
-.product-notes {
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 6px;
-  margin: 20px 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.join-button {
-  padding: 12px 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.join-button:hover {
-  background-color: #218838;
-}
-
-@media (max-width: 768px) {
-  .search-filters {
-    flex-direction: column;
-  }
-
-  .search-input {
-    max-width: none;
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-content {
-    width: 95%;
-    margin: 10px;
-  }
+.v-btn {
+  color: #26A69A;
 }
 </style>

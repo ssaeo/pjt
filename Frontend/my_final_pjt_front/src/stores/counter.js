@@ -351,19 +351,27 @@ const fetchProducts = function () {
     })
 }
 
+// ... existing code ...
 const fetchProductDetail = function (type, id) {
+  if (!type || !id) {
+    console.error('상품 타입 또는 ID가 없습니다:', { type, id });
+    return Promise.reject(new Error('상품 정보가 올바르지 않습니다.'));
+  }
+
   return axios({
     method: 'get',
-    url: `${API_URL}/finlife/products/${type}/${id}/`  // URL 수정
+    url: `${API_URL}/finlife/products/${type}/${id}/`
   })
     .then((res) => {
-      selectedProduct.value = res.data
-      return res.data
+      selectedProduct.value = res.data;
+      return res.data;
     })
     .catch((err) => {
-      console.error('상품 상세 조회 실패:', err)
-    })
-}
+      console.error('상품 상세 조회 실패:', err);
+      throw err;
+    });
+};
+// ... existing code ...
 
 const joinFinancialProduct = function (productType, productId) {
   // 디버깅을 위한 로그 추가
