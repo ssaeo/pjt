@@ -1,57 +1,104 @@
 <template>
-  <div class="container">
-    <h1>회원가입</h1>
+  <v-container>
+    <v-row justify="center">
+      <v-col cols="12" md="8">
+        <v-card
+          class="container"
+          elevation="8"
+          max-width="500"
+          rounded="lg"
+        >
+          <h1>회원가입</h1>
 
-    <div class="checkbox">
-      <p class="warning">{{ errorAgree }}</p>
-      <label>
-        <input type="checkbox" value="service" v-model="selected">
-        (필수) 서비스 이용약관 동의
-      </label>
-      <label>
-        <input type="checkbox" value="info" v-model="selected">
-        (필수) 개인정보 처리 동의
-      </label>
-      <label>
-        <input type="checkbox" v-model="isAgreeAll">
-        <span class="color">전체 동의</span>
-      </label>
-    </div>
+          <form @submit.prevent="signUp" class="form">
+            <v-text-field
+              variant="outlined"
+              color="#26A69A"
+              label="아이디"
+              v-model="state.username"
+              :error-messages="errors.username ? [errors.username] : []"
+              @blur="validateUsername"
+            ></v-text-field>
 
-    <form @submit.prevent="signUp">
-      <div>
-        <label>아이디</label>
-        <input type="text" v-model="state.username" @blur="validateUsername" :class="{ 'invalid': errors.username }">
-        <span class="error" v-if="errors.username">{{ errors.username }}</span>
-      </div>
+            <v-text-field
+              variant="outlined"
+              color="#26A69A"
+              label="닉네임"
+              v-model="state.name"
+              :error-messages="errors.name ? [errors.name] : []"
+              @blur="validateName"
+            ></v-text-field>
 
-      <div>
-        <label>닉네임</label>
-        <input type="text" v-model="state.name" @blur="validateName" :class="{ 'invalid': errors.name }">
-        <span class="error" v-if="errors.name">{{ errors.name }}</span>
-      </div>
+            <v-text-field
+              variant="outlined"
+              color="#26A69A"
+              label="이메일"
+              v-model="state.email"
+              :error-messages="errors.email ? [errors.email] : []"
+              @blur="validateEmail"
+            ></v-text-field>
 
-      <div>
-        <label>이메일</label>
-        <input type="email" v-model="state.email" @blur="validateEmail" :class="{ 'invalid': errors.email }">
-        <span class="error" v-if="errors.email">{{ errors.email }}</span>
-      </div>
+            <v-text-field
+              variant="outlined"
+              color="#26A69A"
+              :append-icon="show1 ? 'mdi-eye-off' : 'mdi-eye'"
+              :type="show1 ? 'text' : 'password'"
+              label="비밀번호"
+              v-model="state.password1"
+              @click:append="show1 = !show1"
+              :error-messages="errors.password1 ? [errors.password1] : []"
+              @blur="validatePassword1"
+            ></v-text-field>
 
-      <div>
-        <label>비밀번호</label>
-        <input :type="show1 ? 'text' : 'password'" v-model="state.password1" @blur="validatePassword1" :class="{ 'invalid': errors.password1 }">
-        <span class="error" v-if="errors.password1">{{ errors.password1 }}</span>
-      </div>
+            <v-text-field
+              variant="outlined"
+              color="#26A69A"
+              :append-icon="show2 ? 'mdi-eye-off' : 'mdi-eye'"
+              :type="show2 ? 'text' : 'password'"
+              label="비밀번호 확인"
+              v-model="state.password2"
+              @click:append="show2 = !show2"
+              :error-messages="errors.password2 ? [errors.password2] : []"
+              @blur="validatePassword2"
+            ></v-text-field>
 
-      <div>
-        <label>비밀번호 확인</label>
-        <input :type="show2 ? 'text' : 'password'" v-model="state.password2" @blur="validatePassword2" :class="{ 'invalid': errors.password2 }">
-        <span class="error" v-if="errors.password2">{{ errors.password2 }}</span>
-      </div>
+            <div class="checkbox">
+              <p class="warning">{{ errorAgree }}</p>
+              <v-checkbox
+                color="#26A69A"
+                label="(필수) 서비스 이용약관 동의"
+                value="service"
+                v-model="selected"
+              ></v-checkbox>
+              <v-checkbox
+                color="#26A69A"
+                label="(필수) 개인정보 처리 동의"
+                value="info"
+                v-model="selected"
+              ></v-checkbox>
+              <v-checkbox
+                color="#26A69A"
+                v-model="isAgreeAll"
+              >
+                <template v-slot:label>
+                  <span class="color">전체 동의</span>
+                </template>
+              </v-checkbox>
+            </div>
 
-      <button type="submit">Sign up</button>
-    </form>
-  </div>
+            <v-btn
+              block
+              variant="flat"
+              color="#26A69A"
+              @click.prevent="signUp"
+            >
+              가입하기
+            </v-btn>
+          </form>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup>
@@ -166,10 +213,10 @@ const signUp = function () {
         username: state.value.username,
         name: state.value.name,
         email: state.value.email,
-        password: state.value.password1,  // 서버가 기대하는 필드명 확인
+        password: state.value.password1,
       }
       
-      console.log('회원가입 요청 데이터:', payload)  // 요청 데이터 확인
+      console.log('회원가입 요청 데이터:', payload)
       
       userStore.signUp(payload)
     }
@@ -183,60 +230,23 @@ const signUp = function () {
   max-width: 500px;
   margin: 3rem auto;
   padding: 2rem;
-  background-color: #f9f9f9;
+  background-color: #FFFFFF;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.checkbox {
-  margin: 1rem 0;
-  text-align: left;
 }
 
 form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-top: 3rem; /* h1과 form 사이의 간격 추가 */
 }
 
-form div {
+.checkbox {
+  margin: 1rem 0;
+  text-align: left;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-}
-
-form label {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-form input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.3s;
-}
-
-form input.invalid {
-  border-color: red;
-}
-
-form button {
-  padding: 0.75rem;
-  background-color: #1089FF;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-form button:hover {
-  background-color: #0a6dc2;
 }
 
 .warning {

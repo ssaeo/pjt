@@ -5,7 +5,7 @@
     <v-form class="my-5">
       <v-text-field
         variant="outlined"
-        color="#1089FF"
+        color="#26A69A"
         label="제목"
         v-model="state.title"
         :error-messages="v$.title.$errors.map(e => e.$message)"
@@ -15,7 +15,7 @@
       ></v-text-field>
       <v-textarea
         variant="outlined"
-        color="#1089FF"
+        color="#26A69A"
         label="내용"
         v-model="state.content"
         auto-grow
@@ -29,7 +29,7 @@
       <v-btn
         block
         variant="flat"
-        color="#1089FF"
+        color="#26A69A"
         @click.prevent="createPost"
       >
         게시물 포스팅

@@ -2,11 +2,11 @@
   <div v-if="article" class="container">
     <GoToBack :goName="{ name: 'ArticleList', query: { page: pageNum } }" />
     <header>
-      <p class="text-subtitle-2">{{ article.id }}번째 게시물</p>
+      <p class="text-subtitle-3">{{ article.id }}번째 게시글</p>
       <div class="d-flex justify-space-between align-center">
         <h1>{{ article.title }}</h1>
         <div class="d-flex">
-          <p class="mr-2 text-caption">작성자 :</p>
+          <p class="mr-2 text-h7">작성자 :</p>
           <v-avatar size="x-small">
             <v-img
               cover
@@ -14,18 +14,27 @@
               alt="profile-img"
             ></v-img>
           </v-avatar>
-          <p class="ml-1 text-caption">{{ article.user.username }}</p>
+          <p class="ml-1 text-h7">{{ article.user.name }}</p>
         </div>
       </div>
       <div class="d-flex justify-space-between">
         <div class="left">
-          <span class="text-caption">작성일 : {{ formatDate(article.created_at) }}</span>
-          <span class="text-caption ml-3">수정일 : {{ formatDate(article.updated_at) }}</span> <!-- 간격 추가 -->
+          <span class="text-h7">작성일 : {{ formatDate(article.created_at) }}</span>
+          <span class="text-h7 ml-3">수정일 : {{ formatDate(article.updated_at) }}</span> <!-- 간격 추가 -->
         </div>
         <div class="right">
-          <span class="text-caption">조회수: {{ article.views }}</span>
+          <span class="text-h7">조회수: {{ article.views }}</span>
         </div>
-        <div v-if="isPostedUser" class="right">
+        
+      </div>
+    </header>
+    <v-divider class="my-3"></v-divider>
+
+    <main>
+      <article class="text-h5 my-10">
+        <div v-html="article.content"></div>
+      </article>
+      <div v-if="isPostedUser" class="right">
           <v-btn
             class="mr-2"
             size="small"
@@ -40,14 +49,6 @@
             @click.prevent="deleteArticle"
           >삭제</v-btn>
         </div>
-      </div>
-    </header>
-    <v-divider class="my-3"></v-divider>
-
-    <main>
-      <article class="text-body-1 my-10">
-        <div v-html="article.content"></div>
-      </article>
     </main>
     <v-divider class="my-3"></v-divider>
 
@@ -58,13 +59,13 @@
         @submit.prevent="createComment"
       >
         <v-text-field
-          label="댓글"
-          color="#1089FF"
+          label="댓글을 입력해주세요."
+          color="#26A69A"
           variant="outlined"
           v-model="newComment"
         ></v-text-field>
         <v-btn
-          color="#1089FF"
+          color="#26A69A"
           variant="tonal"
           size="large"
           class="mb-5 ml-3"
@@ -84,9 +85,9 @@
             alt="profile-img"
           ></v-img>
         </v-avatar>
-        <p class="ml-1 text-caption">{{ comment.user.username }}</p>
+        <p class="ml-1 text-h7">{{ comment.user.name }}</p>
       </div>
-      <div class="lower mt-1 mb-10 text-body-2 d-flex justify-space-between align-start">
+      <div class="lower mt-1 mb-10 text-h7 d-flex justify-space-between align-start">
         <p class="comment-left" v-html="comment.content"></p>
         <div v-if="store.user && comment.user.username === store.user.username" class="right">
           <v-btn

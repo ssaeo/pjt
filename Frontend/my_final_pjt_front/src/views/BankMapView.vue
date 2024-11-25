@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row justify="center">
-      <v-col cols="12" md="8">
+      <v-col cols="12" md="12">
         <v-card class="pa-5">
           <v-card-title>
             <h1>주변 은행 검색</h1>
@@ -16,6 +16,8 @@
                   label="광역시 / 도"
                   dense
                   outlined
+                  variant="outlined"
+                  color="teal-lighten-1"
                 ></v-select>
               </v-col>
               <v-col cols="12" md="3">
@@ -25,6 +27,8 @@
                   label="시/군/구"
                   dense
                   outlined
+                  variant="outlined"
+                  color="teal-lighten-1"
                 ></v-select>
               </v-col>
               <v-col cols="12" md="3">
@@ -34,19 +38,29 @@
                   label="은행"
                   dense
                   outlined
+                  variant="outlined"
+                  color="teal-lighten-1"
                 ></v-select>
               </v-col>
-              <v-col cols="12" md="3" class="d-flex align-center">
-                <v-btn @click="clickSearch" color="primary" class="search-btn" block>
-                  찾기
-                </v-btn>
-              </v-col>
+              <v-col cols="12" md="3" class="d-flex align-start"> <!-- align-start로 변경 -->
+        <v-btn 
+          @click="clickSearch"
+          variant="flat"
+          color="#26A69A"
+          size="x-large"
+          class="pr-7 ml-2 mb-6"
+          block
+        >
+        <v-icon class="me-1 mt-1">mdi-magnify</v-icon>
+          찾기
+        </v-btn>
+      </v-col>
             </v-row>
             <v-card class="map-container elevation-7 mb-15">
               <v-btn
                 @click="clickCurrentSearch"
                 class="current-search-btn"
-                color="primary"
+                color="#26A69A"
                 elevation="8"
                 large
               >
@@ -240,12 +254,6 @@ const clickCurrentSearch = function () {
   border-radius: 10px;
 }
 
-.search-btn {
-  height: 40px; /* 드롭다운과 동일한 높이로 설정 */
-  min-width: 100px;
-}
 
-.v-select {
-  margin-bottom: 20px;
-}
+
 </style>

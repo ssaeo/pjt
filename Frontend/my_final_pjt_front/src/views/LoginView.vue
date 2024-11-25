@@ -1,19 +1,77 @@
 <template>
-  <div class="container">
-    <h1>로그인</h1>
-    <form @submit.prevent="logIn">
-      <div>
-        <label for="username">아이디: </label>
-        <input type="text" id="username" v-model.trim="username" required>
+  <div>
+    <!-- <v-img
+      class="mx-auto my-6"
+      max-width="228"
+      src="https://cdn.vuetifyjs.com/docs/images/logos/vuetify-logo-v3-slim-text-light.svg"
+    ></v-img> -->
+    
+    <v-card
+      class="mx-auto pa-12 pb-8 mt-15"
+      elevation="8"
+      max-width="448"
+      rounded="lg"
+    >
+      <h1>로그인</h1>
+      <div class="text-subtitle-1 text-medium-emphasis mt-5">아이디</div>
+
+      <v-text-field
+        density="compact"
+        placeholder="아이디"
+        prepend-inner-icon="mdi-account-outline"
+        variant="outlined"
+        v-model="username"
+        color="teal-lighten-1"
+        required
+      ></v-text-field>
+
+      <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
+        비밀번호
+
+        <!-- <a
+          class="text-caption text-decoration-none text-blue"
+          href="#"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          비밀번호를 잊으셨나요?</a> -->
       </div>
 
-      <div>
-        <label for="password">비밀번호: </label>
-        <input type="password" id="password" v-model.trim="password" required>
-      </div>
+      <v-text-field
+        :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
+        :type="visible ? 'text' : 'password'"
+        density="compact"
+        placeholder="비밀번호 입력"
+        prepend-inner-icon="mdi-lock-outline"
+        variant="outlined"
+        v-model="password"
+        color="teal-lighten-1"
+        @click:append-inner="visible = !visible"
+        required
+      ></v-text-field>
 
-      <button type="submit">로그인</button>
-    </form>
+      <v-btn
+        class="mt-5 mb-8"
+        color="#26A69A"
+        size="large"
+        variant="tonal"
+        block
+        @click="logIn"
+        
+      >
+        로그인
+      </v-btn>
+
+      <v-card-text class="text-center">
+        <a
+          class="text-teal-lighten-1 text-decoration-none"
+          href="#"
+          @click.prevent="goToSignUp"
+        >
+          회원가입 <v-icon icon="mdi-chevron-right"></v-icon>
+        </a>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
@@ -25,6 +83,7 @@ import { useRouter } from 'vue-router'
 
 const username = ref('')
 const password = ref('')
+const visible = ref(false)
 
 const store = useCounterStore()
 const router = useRouter()
@@ -54,6 +113,10 @@ const logIn = function () {
       alert(err.response?.data?.error || '로그인에 실패했습니다.')
     })
 }
+
+const goToSignUp = () => {
+  router.push({ name: 'SignUpView' })  // 회원가입 페이지로 이동
+}
 </script>
 
 <style scoped>
@@ -62,7 +125,7 @@ const logIn = function () {
   max-width: 500px;
   margin: 3rem auto;
   padding: 2rem;
-  background-color: #f9f9f9;
+  background-color: #FAFAFA;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
@@ -96,7 +159,7 @@ form input {
 
 form button {
   padding: 0.75rem;
-  background-color: #1089FF;
+  background-color: #26A69A;
   color: white;
   border: none;
   border-radius: 4px;
@@ -106,6 +169,6 @@ form button {
 }
 
 form button:hover {
-  background-color: #0a6dc2;
+  background-color: #26A69A;
 }
 </style>

@@ -2,7 +2,7 @@
   <v-container class="container" v-if="store.user">
     <v-card class="pa-5">
       <v-card-title class="title">
-        <h1>{{ store.user.nickname }}님의 프로필 페이지</h1>
+        <h1>{{ store.user.name }}님의 프로필 페이지</h1>
       </v-card-title>
       <v-divider></v-divider>
       <v-card-text>
@@ -23,7 +23,7 @@
               <v-list-item>
                 <v-list-item-content>
                   <v-list-item-title>닉네임</v-list-item-title>
-                  <v-list-item-subtitle>{{ store.user.nickname || '미설정' }}</v-list-item-subtitle>
+                  <v-list-item-subtitle>{{ store.user.name || '미설정' }}</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
               <v-list-item>
@@ -65,12 +65,34 @@
         </v-row>
         <v-row justify="end" class="mt-4">
           <v-col cols="auto">
-            <v-btn :style="{ backgroundColor: '#6c757d', color: 'white' }" @click="startEditing">정보 수정하기</v-btn>
+            <v-btn :style="{ backgroundColor: '#6c757d', color: 'white' }" @click="openEditModal">정보 수정하기</v-btn>
             <v-btn :style="{ backgroundColor: '#dc3545', color: 'white' }" @click="confirmDelete">회원 탈퇴</v-btn>
           </v-col>
         </v-row>
       </v-card-text>
     </v-card>
+
+    <!-- 정보 수정 모달 -->
+    <v-dialog v-model="isEditDialogOpen" max-width="600">
+      <v-card>
+        <v-card-title class="headline">정보 수정</v-card-title>
+        <v-card-text>
+          <v-form>
+            <v-text-field v-model="editedUser.username" label="아이디" disabled variant="outlined" clearable color="teal-lighten-1"></v-text-field>
+            <v-text-field v-model="editedUser.name" label="닉네임" variant="outlined" clearable color="teal-lighten-1"></v-text-field>
+            <v-text-field v-model="editedUser.email" label="이메일" variant="outlined" clearable color="teal-lighten-1"></v-text-field>
+            <v-text-field v-model="editedUser.age" label="나이" type="number" variant="outlined" clearable color="teal-lighten-1"></v-text-field>
+            <v-text-field v-model="editedUser.address" label="주소" variant="outlined" clearable color="teal-lighten-1"></v-text-field>
+            <v-file-input label="프로필 이미지" @change="handleImageChange" variant="outlined" clearable color="teal-lighten-1"></v-file-input>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="updateProfile">저장</v-btn>
+          <v-btn color="grey" @click="cancelEdit">취소</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- 상품 상세 모달 -->
     <v-dialog v-model="isDialogOpen" max-width="800">
@@ -126,7 +148,7 @@
           </v-list>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn color="red" @click="terminateProduct">
+          <v-btn color="red" @click="terminateSelectedProduct">
             <v-icon left>mdi-delete</v-icon>해지하기
           </v-btn>
           <v-btn color="grey" @click="closeModal">
@@ -145,11 +167,11 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const store = useCounterStore()
-const isEditing = ref(false)
+const isEditDialogOpen = ref(false) // 정보 수정 모달 열림 상태
 const editedUser = ref({})
 const selectedImage = ref(null)
 const selectedProduct = ref(null) // 선택된 상품
-const isDialogOpen = ref(false) // 모달 열림 상태
+const isDialogOpen = ref(false) // 상품 상세 모달 열림 상태
 
 // 프로필 이미지 URL 계산
 const profileImageUrl = computed(() => {
@@ -206,9 +228,9 @@ const terminateSelectedProduct = () => {
   }
 }
 
-const startEditing = () => {
+const openEditModal = () => {
   editedUser.value = { ...store.user }
-  isEditing.value = true
+  isEditDialogOpen.value = true
 }
 
 const handleImageChange = (event) => {
@@ -219,46 +241,41 @@ const handleImageChange = (event) => {
 }
 
 const updateProfile = () => {
-  const formData = new FormData()
+  console.log('updateProfile 함수 호출됨'); // 디버깅을 위한 로그
+  const formData = new FormData();
   
   // 변경된 데이터만 FormData에 추가
   Object.keys(editedUser.value).forEach(key => {
     if (editedUser.value[key] !== store.user[key] && editedUser.value[key] !== null) {
-      formData.append(key, editedUser.value[key])
+      formData.append(key, editedUser.value[key]);
     }
-  })
+  });
 
   // 프로필 이미지 추가
   if (selectedImage.value) {
-    formData.append('profile_img', selectedImage.value)
+    formData.append('profile_img', selectedImage.value);
   }
 
   store.updateProfile(store.user.username, formData)
     .then(() => {
-      return store.getProfile(route.params.username)
+      return store.getProfile(route.params.username);
     })
     .then(() => {
-      isEditing.value = false
+      isEditDialogOpen.value = false;
     })
     .catch((error) => {
-      console.error('프로필 업데이트 실패:', error)
-    })
+      console.error('프로필 업데이트 실패:', error);
+    });
 }
 
 const cancelEdit = () => {
-  isEditing.value = false
+  isEditDialogOpen.value = false
 }
 
 const confirmDelete = () => {
   if (confirm('정말 탈퇴하시겠습니까?')) {
     store.deleteAccount(store.user.username)
   }
-}
-
-const formatRate = (rate) => {
-  if (rate === undefined || rate === null || rate === -1) return '-'
-  const parsedRate = parseFloat(rate)
-  return isNaN(parsedRate) ? '-' : `${parsedRate}%`
 }
 
 const getJoinDenyText = (joinDeny) => {
@@ -277,19 +294,6 @@ const getJoinDenyText = (joinDeny) => {
   margin: 3rem auto;
 }
 
-.title {
-  color: #4b5320; /* 카키색 포인트 */
-}
-
-.v-card {
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.v-btn {
-  margin-left: 8px;
-}
-
 .product-card {
   cursor: pointer;
   transition: transform 0.2s;
@@ -299,17 +303,11 @@ const getJoinDenyText = (joinDeny) => {
   transform: scale(1.05);
 }
 
-.v-list-item-title {
-  font-weight: bold;
-}
-
-.v-list-item-subtitle {
-  color: #555;
-}
-
 .multiline {
   white-space: pre-wrap; /* 줄바꿈을 유지하여 텍스트를 표시 */
   overflow-wrap: break-word; /* 긴 단어를 줄바꿈 */
   word-wrap: break-word; /* 긴 단어를 줄바꿈 */
 }
+
+
 </style>

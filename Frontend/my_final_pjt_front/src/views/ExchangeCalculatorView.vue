@@ -1,53 +1,83 @@
 <template>
-  <div class="exchange-calculator">
-    <h1>환율 계산기</h1>
+  <v-container class="exchange-calculator">
+    <v-card
+      class="mx-auto pa-12 pb-8 mt-15"
+      elevation="8"
+      max-width="800"
+      rounded="lg"
+    >
+      <v-row>
+        <v-col cols="12">
+          <h1 class="exchange-title">환율 계산기</h1> <!-- 클래스 추가 -->
+        </v-col>
+      </v-row>
 
-    <!-- rates를 store.exchangeRates로 변경 -->
-    <div class="input-group">
-      <label for="country-select">환율을 계산할 국가를 선택하세요:</label>
-      <select id="country-select" v-model="selectedCountry">
-        <option v-for="rate in store.exchangeRates" :key="rate.cur_unit" :value="rate.cur_unit">
-          {{ rate.cur_nm }} ({{ rate.cur_unit }})
-        </option>
-      </select>
-    </div>
+      <!-- 입력 모드 선택 -->
+      <v-row justify="end">
+        <v-col cols="auto">
+          <v-radio-group v-model="inputMode" row>
+            <v-radio label="원화 입력" value="krw" color="#26A69A"></v-radio>
+            <v-radio label="외화 입력" value="foreign" color="#26A69A"></v-radio>
+          </v-radio-group>
+        </v-col>
+      </v-row>
 
-    <!-- 원화 입력 -->
-    <div class="input-group">
-      <label for="krw-input">원화를 입력하세요 (KRW):</label>
-      <input
-        id="krw-input"
-        v-model.number="krwAmount"
-        type="number"
-        placeholder="원화 금액을 입력하세요"
-        @input="convertToForeign"
-      />
-      <p v-if="krwAmount > 0">
-        {{ formatNumber(krwAmount) }} 원 → 
-        {{ formatNumber(convertedForeignAmount) }} {{ selectedCountry }}
-      </p>
-    </div>
+      <!-- 국가 선택 및 입력 필드 -->
+      <v-row>
+        <v-col cols="6">
+          <v-select
+            v-model="selectedCountry"
+            :items="store.exchangeRates"
+            item-title="cur_nm"
+            item-value="cur_unit"
+            label="국가 선택"
+            variant="outlined"
+            color="#26A69A"
+            dense
+          ></v-select>
+        </v-col>
+        <v-col cols="6">
+          <v-text-field
+            v-if="inputMode === 'krw'"
+            v-model.number="krwAmount"
+            label="원화 입력 (KRW)"
+            type="number"
+            variant="outlined"
+            color="#26A69A"
+            dense
+            @input="convertToForeign"
+          ></v-text-field>
+          <v-text-field
+            v-else
+            v-model.number="foreignAmount"
+            :label="`외화 입력 (${selectedCountry})`"
+            type="number"
+            variant="outlined"
+            color="#26A69A"
+            dense
+            @input="convertToKRW"
+          ></v-text-field>
+        </v-col>
+      </v-row>
 
-    <!-- 외화 입력 -->
-    <div class="input-group">
-      <label for="foreign-input">외화를 입력하세요 ({{ selectedCountry }}):</label>
-      <input
-        id="foreign-input"
-        v-model.number="foreignAmount"
-        type="number"
-        placeholder="외화 금액을 입력하세요"
-        @input="convertToKRW"
-      />
-      <p v-if="foreignAmount > 0">
-        {{ formatNumber(foreignAmount) }} {{ selectedCountry }} → 
-        {{ formatNumber(convertedKRWAmount) }} 원
-      </p>
-    </div>
-  </div>
+      <!-- 변환된 값 출력 -->
+      <v-row>
+        <v-col cols="12">
+          <v-text-field
+            v-model="outputValue"
+            :label="outputLabel"
+            variant="outlined"
+            color="#26A69A"
+            dense
+          ></v-text-field>
+        </v-col>
+      </v-row>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useCounterStore } from '@/stores/counter'
 
 const store = useCounterStore()
@@ -56,6 +86,7 @@ const krwAmount = ref(0)
 const foreignAmount = ref(0)
 const convertedForeignAmount = ref(0)
 const convertedKRWAmount = ref(0)
+const inputMode = ref('krw') // 입력 모드: 'krw' 또는 'foreign'
 
 const convertToForeign = () => {
   const selectedRate = store.exchangeRates.find(rate => rate.cur_unit === selectedCountry.value)
@@ -75,6 +106,18 @@ const formatNumber = (number) => {
   return new Intl.NumberFormat().format(Number(number).toFixed(2))
 }
 
+const outputValue = computed(() => {
+  return inputMode.value === 'krw'
+    ? `${formatNumber(convertedForeignAmount.value)} ${selectedCountry.value}`
+    : `${formatNumber(convertedKRWAmount.value)} 원`
+})
+
+const outputLabel = computed(() => {
+  return inputMode.value === 'krw'
+    ? `변환된 외화 (${selectedCountry.value})`
+    : '변환된 원화 (KRW)'
+})
+
 onMounted(() => {
   store.loadExchangeRates()
   if (store.exchangeRates.length > 0) {
@@ -85,30 +128,18 @@ onMounted(() => {
 
 <style scoped>
 .exchange-calculator {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
 
-.input-group {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 8px;
-}
-
-select, input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.exchange-title {
+  color: #26A69A; /* 원하는 색상으로 변경 */
 }
 
 p {
   color: #2c3e50;
   font-size: 1.1em;
+  margin-top: 10px;
 }
 </style>

@@ -4,7 +4,7 @@
       <h1>게시글 목록</h1>
       <v-btn
         variant="flat"
-        color="#1089FF"
+        color="#26A69A"
         :to="{ name: 'ArticleCreate' }"
       >작성하기</v-btn>
     </div>
@@ -29,7 +29,7 @@
                 alt="profile-img"
               ></v-img>
             </v-avatar>
-            {{ item.user.username }} <!-- 작성자 -->
+            {{ item.user.name }} <!-- 작성자 -->
           </td>
           <td class="views-align">{{ item.views }}</td> <!-- 조회수 -->
         </tr>
@@ -39,7 +39,7 @@
       v-model="page"
       :length="totalPages"
       :total-visible="6"
-      color="#1089FF"
+      color="#26A69A"
       rounded="circle"
     ></v-pagination>
   </div>
