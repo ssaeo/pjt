@@ -326,33 +326,35 @@ def cancel_product(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_products(request):
-    """
-    사용자의 가입 상품 목록 조회
-    """
     user = request.user
     if not user.fin_products:
         return Response({"products": []})
-    
+
     product_list = [p for p in user.fin_products.split(',') if p]
     products = []
-    
+
     for product_info in product_list:
         try:
             product_type, product_id = product_info.split(':')
             if product_type == 'deposit':
                 product = get_object_or_404(DepositProducts, id=product_id)
+                options = DepositOptions.objects.filter(product=product).order_by('save_trm')
                 serializer = DepositProductsSerializer(product)
+                option_serializer = DepositOptionsSerializer(options, many=True)
             elif product_type == 'saving':
                 product = get_object_or_404(SavingProducts, id=product_id)
+                options = SavingOptions.objects.filter(product=product).order_by('save_trm')
                 serializer = SavingProductsSerializer(product)
+                option_serializer = SavingOptionsSerializer(options, many=True)
             else:
                 continue
             products.append({
                 'type': product_type,
-                'product': serializer.data
+                'product': serializer.data,
+                'options': option_serializer.data  # 옵션 데이터를 포함
             })
         except Exception as e:
             print(f"Error processing product {product_info}: {str(e)}")
             continue
-            
+
     return Response({"products": products})

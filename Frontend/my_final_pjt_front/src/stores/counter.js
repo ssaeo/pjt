@@ -311,31 +311,6 @@ const logOut = function () {
       })
   }
 
-  // 은행(BankMap)
-  // 은행 검색 관련 actions
-  // const searchNearbyBranches = (params) => {
-  //   if (!token.value) {
-  //     return Promise.reject('로그인이 필요합니다.')
-  //   }
-  
-  //   console.log('검색 파라미터:', params)
-  
-  //   return axios.get(`${API_URL}/bank-branches/nearby/`, { 
-  //     params,
-  //     headers: {
-  //       'Authorization': `Token ${token.value}`
-  //     }
-  //   })
-  //     .then((res) => {
-  //       console.log('서버 응답:', res.data)
-  //       bankBranches.value = res.data.results
-  //       return res.data.results
-  //     })
-  //     .catch((err) => {
-  //       console.error('주변 은행 검색 실패:', err.response?.data || err)
-  //       throw err
-  //     })
-  // }
 
   // 금융상품 관련 actions
 const fetchProducts = function () {

@@ -11,6 +11,7 @@ import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css'
 import { ko } from 'vuetify/locale'
 import axios from 'axios'
+
 // axios 기본 설정
 axios.defaults.baseURL = 'http://localhost:8000'  // Django 서버 주소
 

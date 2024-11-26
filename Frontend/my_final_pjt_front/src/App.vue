@@ -31,5 +31,6 @@ import Footer from '@/components/Footer.vue' // Footer 컴포넌트 가져오기
 
 .footer {
   flex-shrink: 0;
+  bottom: -150px;
 }
 </style>

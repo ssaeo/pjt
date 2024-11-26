@@ -24,6 +24,11 @@
     </v-tabs>
 
     <v-spacer></v-spacer>
+    <v-spacer></v-spacer>
+    <v-spacer></v-spacer>
+    <v-spacer></v-spacer>
+    <v-spacer></v-spacer>
+    <v-spacer></v-spacer>
 
     <template v-if="!store.isLogin">
       <v-btn text :to="{ name: 'LogInView' }" class="auth-btn">로그인</v-btn>

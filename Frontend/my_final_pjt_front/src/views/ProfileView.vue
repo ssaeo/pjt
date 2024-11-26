@@ -1,6 +1,6 @@
 <template>
   <v-container class="container" v-if="store.user">
-    <v-card class="pa-5">
+    <v-card class="pa-5 elevation-2">
       <v-card-title class="title">
         <h1>
           <span class="user-name">{{ store.user.name }}</span>님의 프로필 페이지
@@ -17,34 +17,34 @@
           <v-col cols="12" md="8">
             <v-list dense>
               <v-list-item>
-                <v-list-item-content>
+                <div class="list-item-content">
                   <v-list-item-title>아이디</v-list-item-title>
                   <v-list-item-subtitle>{{ store.user.username }}</v-list-item-subtitle>
-                </v-list-item-content>
+                </div>
               </v-list-item>
               <v-list-item>
-                <v-list-item-content>
+                <div class="list-item-content">
                   <v-list-item-title>닉네임</v-list-item-title>
                   <v-list-item-subtitle>{{ store.user.name || '미설정' }}</v-list-item-subtitle>
-                </v-list-item-content>
+                </div>
               </v-list-item>
               <v-list-item>
-                <v-list-item-content>
+                <div class="list-item-content">
                   <v-list-item-title>이메일</v-list-item-title>
                   <v-list-item-subtitle>{{ store.user.email || '미설정' }}</v-list-item-subtitle>
-                </v-list-item-content>
+                </div>
               </v-list-item>
               <v-list-item>
-                <v-list-item-content>
+                <div class="list-item-content">
                   <v-list-item-title>나이</v-list-item-title>
                   <v-list-item-subtitle>{{ store.user.age || '미설정' }}</v-list-item-subtitle>
-                </v-list-item-content>
+                </div>
               </v-list-item>
               <v-list-item>
-                <v-list-item-content>
+                <div class="list-item-content">
                   <v-list-item-title>주소</v-list-item-title>
                   <v-list-item-subtitle>{{ store.user.address || '미설정' }}</v-list-item-subtitle>
-                </v-list-item-content>
+                </div>
               </v-list-item>
             </v-list>
           </v-col>
@@ -53,7 +53,7 @@
         <h2>가입한 금융 상품</h2>
         <v-row>
           <v-col v-for="product in userFinancialProducts" :key="product.product.id" cols="12" md="6" lg="4">
-            <v-card class="product-card" @click="selectProduct(product)">
+            <v-card class="product-card elevation-1" @click="selectProduct(product)">
               <v-card-title>
                 <v-icon left>{{ product.type === 'deposit' ? 'mdi-bank' : 'mdi-piggy-bank' }}</v-icon>
                 {{ product.product.fin_prdt_nm }}
@@ -106,48 +106,50 @@
         <v-card-text>
           <v-list dense>
             <v-list-item>
-              <v-list-item-content>
+              <div class="list-item-content">
                 <v-list-item-title>상품명</v-list-item-title>
                 <v-list-item-subtitle>{{ selectedProduct.product.fin_prdt_nm }}</v-list-item-subtitle>
-              </v-list-item-content>
+              </div>
             </v-list-item>
             <v-list-item>
-              <v-list-item-content>
+              <div class="list-item-content">
                 <v-list-item-title>은행명</v-list-item-title>
                 <v-list-item-subtitle>{{ selectedProduct.product.kor_co_nm }}</v-list-item-subtitle>
-              </v-list-item-content>
+              </div>
             </v-list-item>
             <v-list-item>
-              <v-list-item-content>
+              <div class="list-item-content">
                 <v-list-item-title>가입 대상</v-list-item-title>
                 <v-list-item-subtitle>{{ selectedProduct.product.join_member || '제한 없음' }}</v-list-item-subtitle>
-              </v-list-item-content>
+              </div>
             </v-list-item>
             <v-list-item>
-              <v-list-item-content>
+              <div class="list-item-content">
                 <v-list-item-title>가입 방법</v-list-item-title>
                 <v-list-item-subtitle>{{ selectedProduct.product.join_way || '제한 없음' }}</v-list-item-subtitle>
-              </v-list-item-content>
+              </div>
             </v-list-item>
             <v-list-item>
-              <v-list-item-content>
+              <div class="list-item-content">
                 <v-list-item-title>우대 조건</v-list-item-title>
                 <v-list-item-subtitle>{{ selectedProduct.product.spcl_cnd || '해당 없음' }}</v-list-item-subtitle>
-              </v-list-item-content>
+              </div>
             </v-list-item>
             <v-list-item>
-              <v-list-item-content>
+              <div class="list-item-content">
                 <v-list-item-title>상품 설명</v-list-item-title>
                 <v-list-item-subtitle class="multiline">{{ selectedProduct.product.etc_note || '추가 정보 없음' }}</v-list-item-subtitle>
-              </v-list-item-content>
+              </div>
             </v-list-item>
             <v-list-item>
-              <v-list-item-content>
+              <div class="list-item-content">
                 <v-list-item-title>가입 제한</v-list-item-title>
                 <v-list-item-subtitle>{{ getJoinDenyText(selectedProduct.product.join_deny) }}</v-list-item-subtitle>
-              </v-list-item-content>
+              </div>
             </v-list-item>
           </v-list>
+          <!-- 차트 추가 -->
+          <line-chart :chart-data="selectedProductChartData" />
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn color="red" @click="terminateSelectedProduct">
@@ -166,21 +168,20 @@
 import { ref, computed, onMounted } from 'vue'
 import { useCounterStore } from '@/stores/counter'
 import { useRoute } from 'vue-router'
+import LineChart from '@/components/LineChart.vue'
 
 const route = useRoute()
 const store = useCounterStore()
-const isEditDialogOpen = ref(false) // 정보 수정 모달 열림 상태
+const isEditDialogOpen = ref(false)
 const editedUser = ref({})
 const selectedImage = ref(null)
-const selectedProduct = ref(null) // 선택된 상품
-const isDialogOpen = ref(false) // 상품 상세 모달 열림 상태
+const selectedProduct = ref(null)
+const isDialogOpen = ref(false)
 
-// 프로필 이미지 URL 계산
 const profileImageUrl = computed(() => {
   return store.user?.profile_img || `${import.meta.env.VITE_BACKEND_URL}/media/image/profile.png`
 })
 
-// 사용자가 가입한 금융 상품 목록
 const userFinancialProducts = ref([])
 
 onMounted(() => {
@@ -188,24 +189,61 @@ onMounted(() => {
   store.getMyFinancialProducts()
     .then((products) => {
       userFinancialProducts.value = products
+      logInterestRates()
     })
     .catch((err) => {
       console.error('가입한 금융 상품 조회 실패:', err)
     })
 })
 
+const logInterestRates = () => {
+  userFinancialProducts.value.forEach(product => {
+    console.log('상품명:', product.product.fin_prdt_nm);
+    product.options.forEach(option => {
+      console.log(`${option.save_trm}개월 기본 금리: ${option.intr_rate}`);
+      console.log(`${option.save_trm}개월 최고 우대 금리: ${option.intr_rate2}`);
+    });
+  });
+}
+
 const selectProduct = (product) => {
   if (product && product.product) {
     selectedProduct.value = product
-    isDialogOpen.value = true // 모달 열기
+    isDialogOpen.value = true
   } else {
     console.error('상품 선택 오류: 유효하지 않은 상품입니다.')
   }
 }
 
+const selectedProductChartData = computed(() => {
+  if (!selectedProduct.value) return { labels: [], datasets: [] }
+
+  const labels = selectedProduct.value.options.map(option => `${option.save_trm}개월`)
+  const basicRates = selectedProduct.value.options.map(option => option.intr_rate)
+  const maxRates = selectedProduct.value.options.map(option => option.intr_rate2)
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: '기본 금리',
+        data: basicRates,
+        borderColor: '#42A5F5',
+        fill: false
+      },
+      {
+        label: '최고 우대 금리',
+        data: maxRates,
+        borderColor: '#66BB6A',
+        fill: false
+      }
+    ]
+  }
+})
+
 const closeModal = () => {
   selectedProduct.value = null
-  isDialogOpen.value = false // 모달 닫기
+  isDialogOpen.value = false
 }
 
 const terminateSelectedProduct = () => {
@@ -214,7 +252,6 @@ const terminateSelectedProduct = () => {
       store.terminateProduct(selectedProduct.value.type, selectedProduct.value.product.id)
         .then(() => {
           alert('상품이 성공적으로 해지되었습니다.')
-          // 해지된 상품을 목록에서 제거
           userFinancialProducts.value = userFinancialProducts.value.filter(
             (p) => p.product.id !== selectedProduct.value.product.id
           )
@@ -243,17 +280,15 @@ const handleImageChange = (event) => {
 }
 
 const updateProfile = () => {
-  console.log('updateProfile 함수 호출됨'); // 디버깅을 위한 로그
+  console.log('updateProfile 함수 호출됨');
   const formData = new FormData();
   
-  // 변경된 데이터만 FormData에 추가
   Object.keys(editedUser.value).forEach(key => {
     if (editedUser.value[key] !== store.user[key] && editedUser.value[key] !== null) {
       formData.append(key, editedUser.value[key]);
     }
   });
 
-  // 프로필 이미지 추가
   if (selectedImage.value) {
     formData.append('profile_img', selectedImage.value);
   }
@@ -296,6 +331,12 @@ const getJoinDenyText = (joinDeny) => {
   margin: 3rem auto;
 }
 
+.list-item-content {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+}
+
 .product-card {
   cursor: pointer;
   transition: transform 0.2s;
@@ -306,13 +347,24 @@ const getJoinDenyText = (joinDeny) => {
 }
 
 .multiline {
-  white-space: pre-wrap; /* 줄바꿈을 유지하여 텍스트를 표시 */
-  overflow-wrap: break-word; /* 긴 단어를 줄바꿈 */
-  word-wrap: break-word; /* 긴 단어를 줄바꿈 */
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .user-name {
-  color: #42b983; /* 원하는 색상으로 변경 */
+  color: #42b983;
 }
 
+.elevation-2 {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 8px;
+}
+
+.elevation-1 {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 8px;
+}
 </style>
