@@ -1,7 +1,7 @@
 <template>
   <v-container class="container">
     <div class="header d-flex justify-space-between align-end mb-4">
-      <h1>게시글 목록</h1>
+      <h1 class="title">게시글 목록</h1>
       <v-btn
         variant="flat"
         color="#26A69A"
@@ -144,5 +144,11 @@ tbody > tr {
 
 tbody > tr:hover {
   background-color: rgb(247, 250, 253);
+}
+
+.title {
+  text-align: center; /* 가운데 정렬 */
+  color: #26A69A; /* 색상 변경 */
+  margin-bottom: 2rem; /* 아래쪽 간격 추가 */
 }
 </style>

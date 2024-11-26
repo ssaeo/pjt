@@ -2,7 +2,6 @@
   <div v-if="article" class="container">
     <GoToBack :goName="{ name: 'ArticleList', query: { page: pageNum } }" />
     <header>
-      <p class="text-subtitle-3">{{ article.id }}번째 게시글</p>
       <div class="d-flex justify-space-between align-center">
         <h1>{{ article.title }}</h1>
         <div class="d-flex">
@@ -29,22 +28,19 @@
     </header>
     <v-divider class="my-3"></v-divider>
 
-    <main class="position-relative" style="min-height: 200px;"> <!-- 최소 높이 설정 -->
+    <main class="position-relative" style="min-height: 200px;">
       <article class="text-h5 my-10">
         <div v-html="article.content"></div>
       </article>
       <div v-if="isPostedUser" class="edit-buttons">
         <v-btn
-          class="mr-2"
+          class="edit-btn"
           size="small"
-          variant="tonal"
-          color="green-darken-2"
           :to="{ name: 'ArticleUpdate', params: { id: article.id }, query: { page: pageNum }}"
         >수정</v-btn>
         <v-btn
+          class="delete-btn"
           size="small"
-          variant="tonal"
-          color="red-darken-2"
           @click.prevent="deleteArticle"
         >삭제</v-btn>
       </div>
@@ -90,16 +86,13 @@
         <p class="comment-left" v-html="comment.content"></p>
         <div v-if="store.user && comment.user.username === store.user.username" class="right">
           <v-btn
-            class="mr-2"
+            class="edit-btn"
             size="small"
-            variant="tonal"
-            color="green-darken-2"
             @click="editComment(comment.id, comment.content)"
           >수정</v-btn>
           <v-btn
+            class="delete-btn"
             size="small"
-            variant="tonal"
-            color="red-darken-2"
             @click="deleteComment(comment.id)"
           >삭제</v-btn>
         </div>
@@ -141,7 +134,6 @@ onMounted(() => {
     .then((response) => {
       article.value = response
       article.value.content = response.content.replaceAll("\n", "<br />")
-      // 사용자 정보가 존재하는지 확인
       if (article.value.user && store.user && article.value.user.username === store.user.username) {
         isPostedUser.value = true
       }
@@ -211,7 +203,7 @@ const editComment = (commentId, currentContent) => {
 .container {
   width: 1000px;
   margin: 2rem auto;
-  position: relative; /* 부모 요소에 position-relative 추가 */
+  position: relative;
 }
 
 .comment-left {
@@ -226,15 +218,38 @@ const editComment = (commentId, currentContent) => {
 }
 
 .ml-3 {
-  margin-left: 1rem; /* 간격 추가 */
+  margin-left: 1rem;
 }
 
 .edit-buttons {
   position: absolute;
   right: 0;
-  bottom: 20px; /* 하단에 고정 */
+  bottom: 20px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
+}
+
+.edit-btn {
+  background-color: #4CAF50; /* 수정 버튼 색상 */
+  color: white;
+  border-radius: 5px;
+  margin-right: 5px;
+  transition: background-color 0.3s;
+}
+
+.edit-btn:hover {
+  background-color: #45a049; /* 수정 버튼 호버 색상 */
+}
+
+.delete-btn {
+  background-color: #f44336; /* 삭제 버튼 색상 */
+  color: white;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.delete-btn:hover {
+  background-color: #e53935; /* 삭제 버튼 호버 색상 */
 }
 </style>

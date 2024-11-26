@@ -27,7 +27,7 @@ const clickBack = function () {
         start
         icon="mdi-arrow-left"
       ></v-icon>
-      Back
+      뒤로가기
     </v-btn>
   </div>
 </template>

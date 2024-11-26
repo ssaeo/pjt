@@ -12,7 +12,7 @@
       max-width="448"
       rounded="lg"
     >
-      <h1>로그인</h1>
+      <h1 class="title">로그인</h1>
       <div class="text-subtitle-1 text-medium-emphasis mt-5">아이디</div>
 
       <v-text-field
@@ -129,6 +129,12 @@ const goToSignUp = () => {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
+}
+
+.title {
+  text-align: center; /* 가운데 정렬 */
+  color: #26A69A; /* 색상 변경 */
+  margin-bottom: 2rem; /* 아래쪽 간격 추가 */
 }
 
 form {

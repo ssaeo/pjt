@@ -4,7 +4,7 @@
       <v-col cols="12" md="12">
         <v-card class="pa-5">
           <v-card-title>
-            <h1>주변 은행 검색</h1>
+            <h1 class="title">주변 은행 검색</h1>
           </v-card-title>
           <v-divider></v-divider>
           <v-card-text>
@@ -64,7 +64,7 @@
                 elevation="8"
                 large
               >
-                현 지도에서 해당 은행 검색
+                보고있는 위치에서 재탐색
               </v-btn>
               <div id="map" :style="`width: 100%; height: 600px;`"></div>
             </v-card>
@@ -235,6 +235,11 @@ const clickCurrentSearch = function () {
 .map-container {
   position: relative;
   border-radius: 10px;
+}
+
+.title {
+  color: #26A69A; /* 색상 변경 */
+  margin-bottom: 2rem; /* 아래쪽 간격 추가 */
 }
 
 .current-search-btn {

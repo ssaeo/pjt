@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <GoToBack :goName="{ name: 'ArticleList', query: { page: 1 } }" />
-    <h1>글 쓰기</h1>
+    <h1 class="title">글 쓰기</h1>
     <v-form class="my-5">
       <v-text-field
         variant="outlined"
@@ -32,7 +32,7 @@
         color="#26A69A"
         @click.prevent="createPost"
       >
-        게시물 포스팅
+        작성완료
       </v-btn>
     </v-form>
   </div>
@@ -89,5 +89,11 @@ const createPost = () => {
 .container {
   width: 1000px;
   margin: 2rem auto;
+}
+
+.title {
+  text-align: center; /* 가운데 정렬 */
+  color: #26A69A; /* 색상 변경 */
+  margin-bottom: 2rem; /* 아래쪽 간격 추가 */
 }
 </style>
