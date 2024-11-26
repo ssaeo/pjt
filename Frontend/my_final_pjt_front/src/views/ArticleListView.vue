@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <v-container class="container">
     <div class="header d-flex justify-space-between align-end mb-4">
       <h1>게시글 목록</h1>
       <v-btn
@@ -9,7 +9,7 @@
       >작성하기</v-btn>
     </div>
     <table class="elevation-6 mb-4">
-      <thead>
+      <thead class="table-header">
         <tr>
           <th class="left-align">번호</th>
           <th class="center-align">제목</th>
@@ -19,8 +19,8 @@
       </thead>
       <tbody>
         <tr v-for="item in articles" :key="item.id" @click="clickTr(item)">
-          <td class="number-align">{{ item.id }}</td> <!-- 게시글 번호 -->
-          <td class="center-align">{{ item.title }} [{{ item.comments_count }}]</td> <!-- 제목과 댓글 수 -->
+          <td class="number-align">{{ item.id }}</td>
+          <td class="center-align">{{ item.title }} [{{ item.comments_count }}]</td>
           <td class="right-align">
             <v-avatar size="small">
               <v-img
@@ -29,9 +29,9 @@
                 alt="profile-img"
               ></v-img>
             </v-avatar>
-            {{ item.user.name }} <!-- 작성자 -->
+            {{ item.user.name }}
           </td>
-          <td class="views-align">{{ item.views }}</td> <!-- 조회수 -->
+          <td class="views-align">{{ item.views }}</td>
         </tr>
       </tbody>
     </table>
@@ -42,7 +42,7 @@
       color="#26A69A"
       rounded="circle"
     ></v-pagination>
-  </div>
+  </v-container>
 </template>
 
 <script setup>
@@ -89,7 +89,7 @@ onMounted(() => {
 
 <style scoped>
 .container {
-  width: 1000px;
+  max-width: 1000px;
   margin: 2rem auto;
 }
 
@@ -102,6 +102,12 @@ onMounted(() => {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 2rem; /* 게시글 목록과 페이지네이션 사이의 간격 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 테이블에 그림자 추가 */
+}
+
+.table-header {
+  background-color: #26A69A; /* 헤더 배경색 설정 */
+  color: white; /* 헤더 텍스트 색상 */
 }
 
 th, td {

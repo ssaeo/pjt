@@ -2,6 +2,7 @@
   <v-app-bar app color="white" flat>
     <v-toolbar-title>
       <RouterLink :to="{ name: 'home' }" class="brand">
+        <img src="@/assets/logo.png" alt="logo" class="logo" /> <!-- 로고 이미지 추가 -->
         FIPL
       </RouterLink>
     </v-toolbar-title>
@@ -68,6 +69,13 @@ const logout = () => {
   color: #26A69A;
   font-weight: bold;
   text-decoration: none;
+  display: flex;
+  align-items: center; /* 로고와 텍스트를 수직 가운데 정렬 */
+}
+
+.logo {
+  height: 40px; /* 로고 이미지의 높이 설정 */
+  margin-right: 8px; /* 로고와 텍스트 사이의 간격 */
 }
 
 .nav-tabs {
