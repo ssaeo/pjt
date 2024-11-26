@@ -82,7 +82,6 @@
               <span class="bank-badge">{{ selectedProductData.product.kor_co_nm }}</span>
             </v-col>
             <v-col cols="12" md="6" class="text-right">
-              <!-- 로그인 상태일 때만 버튼 표시 -->
               <v-btn v-if="isLoggedIn" :color="isSubscribed ? 'error' : 'primary'" @click="toggleSubscription">
                 {{ isSubscribed ? '해지하기' : '가입하기' }}
               </v-btn>
@@ -106,10 +105,8 @@
           <div v-if="Object.keys(groupedOptions).length > 0">
             <v-row v-for="(options, group) in groupedOptions" :key="group" class="rate-group">
               <v-col cols="12">
-                <!-- 적금일 경우에만 그룹 헤더 출력 -->
                 <h5 v-if="selectedProductData.product.type === 'saving'">{{ group }}</h5>
-                <!-- 헤더를 별도의 테이블로 추가 -->
-                <table class="rate-table-header">
+                <table class="rate-table">
                   <thead>
                     <tr>
                       <th>가입기간 (단위:개월)</th>
@@ -118,15 +115,15 @@
                       <th>최고 우대 금리</th>
                     </tr>
                   </thead>
+                  <tbody>
+                    <tr v-for="option in options" :key="option.save_trm">
+                      <td>{{ option.save_trm }}</td>
+                      <td>{{ option.intr_rate_type_nm }}</td>
+                      <td>{{ option.intr_rate }}%</td>
+                      <td>{{ option.intr_rate2 }}%</td>
+                    </tr>
+                  </tbody>
                 </table>
-                <v-data-table
-                  :headers="rateHeaders"
-                  :items="options"
-                  class="elevation-1"
-                  dense
-                  hide-default-footer
-                  hide-default-header
-                ></v-data-table>
               </v-col>
             </v-row>
           </div>
@@ -454,12 +451,33 @@ tr:hover {
   margin: 16px 0;
 }
 
+.rate-table-header, .rate-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rate-table-header th, .rate-table th, .rate-table td {
+  text-align: center; /* 텍스트 가운데 정렬 */
+  vertical-align: middle; /* 수직 정렬 */
+  padding: 8px; /* 패딩 추가 */
+  border-bottom: 1px solid #e0e0e0; /* 하단 경계선 추가 */
+}
+
 .rate-table-header th {
-  text-align: center; /* 헤더 가운데 정렬 */
+  background-color: #26A69A;
+  color: white;
+  font-weight: bold;
 }
 
 .title-spacing {
   margin-top: 40px; /* 위쪽 간격 */
   margin-bottom: 40px; /* 아래쪽 간격 */
+}
+
+.fixed-card {
+  background-color: white; /* 모달 배경색을 흰색으로 설정 */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 1); /* 그림자 추가: 더 강한 효과 */
+  border-radius: 8px;
+  min-height: 500px; /* 고정된 최소 높이 설정 */
 }
 </style>
